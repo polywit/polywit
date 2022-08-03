@@ -42,7 +42,7 @@ class JavaValidationHarness(BaseValidationHarness):
         )
         self.run_args = ['java', '-cp', self.directory, '-ea', 'Test']
 
-    def build_test_harness(self, assumptions) -> None:
+    def build_validation_harness(self, assumptions) -> None:
         """
          Constructs and compiles the validator harness consisting of
          the unit tests and the test verifier
