@@ -80,7 +80,7 @@ class BaseValidationHarness(ABC):
         :param assumptions: Assumptions extracted from the witness
         """
         self._build_unit_test()
-        self._build_test_validation(assumptions)
+        self._build_test_verifier(assumptions)
 
     @abstractmethod
     def _build_unit_test(self) -> None:
@@ -89,9 +89,9 @@ class BaseValidationHarness(ABC):
         """
 
     @abstractmethod
-    def _build_test_validation(self, assumptions) -> None:
+    def _build_test_verifier(self, assumptions) -> None:
         """
-        Constructs the tests validation from a list of assumptions
+        Constructs the tests verifier from a list of assumptions
         and Verifier.java
         :param assumptions: Assumptions extracted from the witness
         """
