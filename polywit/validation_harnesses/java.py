@@ -48,7 +48,7 @@ class JavaValidationHarness(BaseValidationHarness):
          the unit tests and the test verifier
         :param assumptions: Assumptions extracted from the witness
         """
-        super().build_test_harness(assumptions)
+        super().build_validation_harness(assumptions)
         _, _ = self._compile_test_harness()
 
     def _build_unit_test(self) -> None:
@@ -98,6 +98,6 @@ class JavaValidationHarness(BaseValidationHarness):
         validation_output = validation_error if validation_error else validation_output
         if 'Exception in thread "main" java.lang.AssertionError' in validation_output:
             return 'polywit: Witness Correct'
-        if 'wit4java: Witness Spurious' in validation_output:
+        if 'polywit: Witness Spurious' in validation_output:
             return 'polywit: Witness Spurious'
         return 'polywit: Could not validate witness'

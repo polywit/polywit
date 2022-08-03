@@ -102,7 +102,7 @@ class BaseValidationHarness(ABC):
         :return: The validation result
         """
         out, err = self._run_command(self.run_args)
-        return self._parse_validation_result(out)
+        return self._parse_validation_result(out, err)
 
     @abstractmethod
     def _parse_validation_result(self, validation_output, validation_error) -> None:

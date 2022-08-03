@@ -19,8 +19,8 @@ class JavaWitnessProcessor(WitnessProcessor):
     A class representing the Java witness processor
     """
 
-    def __init__(self, working_dir, witness_path):
-        super().__init__(working_dir)
+    def __init__(self, test_directory, witness_path):
+        super().__init__(test_directory, witness_path)
 
     def preprocess(self) -> None:
         """
@@ -32,7 +32,7 @@ class JavaWitnessProcessor(WitnessProcessor):
         cleaned_data = re.sub(r"\(\"(.*)<(.*)>(.*)\"\)", r'("\1&lt;\2&gt;\3")', data)
         if cleaned_data != data:
             path = "cleaned_witness.grapmhl"
-            self.witness_path = self.write_to_working_dir(path, cleaned_data)
+            self.witness_path = self.write_to_test_directory(path, cleaned_data)
 
     @staticmethod
     def _extract_value_from_assumption(assumption, regex):
@@ -106,16 +106,16 @@ class JavaFileProcessor(FileProcessor):
     A class representing the Java files processor
     """
 
-    def __init__(self, working_dir, benchmark_path, package_paths):
-        super().__init__(working_dir)
+    def __init__(self, test_directory, benchmark_path, package_paths):
+        super().__init__(test_directory)
         self.benchmark_path = benchmark_path
         self.package_paths = package_paths
         self.source_files = list(glob.glob(self.benchmark_path + "/**/*.java", recursive=True))
 
     def preprocess(self):
-        copy_tree(self.benchmark_path, self.working_dir)
+        copy_tree(self.benchmark_path, self.test_directory)
         for package in self.package_paths:
-            copy_tree(package, self.working_dir)
+            copy_tree(package, self.test_directory)
 
     def _check_valid_import(self, import_line):
         check_file = import_line.strip().replace(".", "/").replace(";", "").replace("import", "").replace(' ', '')
@@ -188,7 +188,7 @@ class JavaFileProcessor(FileProcessor):
                 if node.body is None or len(node.body) == 0:
                     continue
                 statement = node.body[0]
-                if(type(statement) == javalang.tree.ReturnStatement
+                if(isinstance(statement, javalang.tree.ReturnStatement)
                     and (program_name, statement.position.line) in types_map
                 ):
                     nondet_functions_map[node.name] = (program_name, statement.position.line)
@@ -200,14 +200,3 @@ class JavaFileProcessor(FileProcessor):
                     types_map[(program_name, node.position.line)] = types_map[position]
 
         return types_map
-
-
-def filter_assumptions(nondet_mappings, assumptions_list):
-    """
-    Filters assumptions to only contain values from nondet function calls.
-    :param nondet_mappings: A mapping from a position of a nondet call to its type
-    :param assumptions_list: A list of assumptions
-    :return: A list of assumptions values that come from nondet functions
-    """
-    filtered_assumptions = filter(lambda assumption: (assumption[0] in nondet_mappings), assumptions_list)
-    return list(map(lambda assumption: assumption[1], filtered_assumptions))
