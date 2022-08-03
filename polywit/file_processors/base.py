@@ -1,13 +1,10 @@
 """
- This file is part of wit4java, an execution-based violation-witness validator for Java
- https://github.com/wit4java/wit4java.
+ This file is part of polywit, a poly-language execution-based violation-witness validator
+ https://github.com/polywit/polywit.
 
- This module deals with the processing of the witness, benchmark and packages
+ This module deals with the base definitions for processing of the witness and compilation units
 """
-import glob
 from abc import ABC, abstractmethod
-import re
-from distutils.dir_util import copy_tree
 import os
 class Processor(ABC):
     """
@@ -52,21 +49,6 @@ class FileProcessor(Processor):
         """
         Stub for the extract nondet mappings method
         """
-
-class FileProcessor(ABC):
-    """
-    An abstract class representing the base functionality for a file processor
-    """
-
-    def __init__(self, test_directory):
-        self.test_directory = test_directory
-
-    @abstractmethod
-    def extract_nondet_mappings(self):
-        """
-        Stub for the extract nondet mappings method
-        """
-
 
 class WitnessProcessor(Processor):
     """

@@ -1,6 +1,6 @@
 """
  This file is part of polywit, a poly-language execution-based violation-witness validator
- https://github.com/wit4java/wit4java.
+ https://github.com/polywit/polywit.
 
  This module deals with the processing of the witness, benchmark and packages for Java
 """
@@ -58,7 +58,7 @@ class JavaWitnessProcessor(WitnessProcessor):
                 assumption_value = matches[-1]
             else:
                 assumption_value = None
-        # Strip trailing semi colon if has been missed by regex
+        # Strip trailing semicolon if has been missed by regex
         if assumption_value.endswith(';'):
             assumption_value = assumption_value[:-1]
         # TODO Extract into new parser class and have methods handling specific edge values
