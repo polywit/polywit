@@ -8,7 +8,7 @@
 import os
 from typing import Tuple
 
-from polywit.validation_harnesses.base import BaseValidationHarness
+from polywit.validation_harnesses.base import BaseValidationHarness, ValidationResult
 
 
 class JavaValidationHarness(BaseValidationHarness):
@@ -97,7 +97,9 @@ class JavaValidationHarness(BaseValidationHarness):
         # Set output to be stderr if there is some erroneous output
         validation_output = validation_error if validation_error else validation_output
         if 'Exception in thread "main" java.lang.AssertionError' in validation_output:
-            return 'polywit: Witness Correct'
-        if 'polywit: Witness Spurious' in validation_output:
-            return 'polywit: Witness Spurious'
-        return 'polywit: Could not validate witness'
+            result = ValidationResult.CORRECT
+        elif 'polywit: Witness Spurious' in validation_output:
+            result = ValidationResult.SPURIOUS
+        else:
+            result = ValidationResult.UNKNOWN
+        return f'polywit: {result}'

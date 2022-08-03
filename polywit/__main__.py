@@ -77,8 +77,7 @@ def main():
     config = parser.parse_args(sys.argv[1:])
     config = vars(config)
     try:
-        print(f'polywit version: {__version__}')
-        print("witness: ", config['witness_file'])
+        print(f'polywit v{__version__}')
 
         # Create temporary directory for easier cleanup
         tmp_dir = tempfile.mkdtemp()
@@ -100,7 +99,6 @@ def main():
         validation_harness.build_validation_harness(assumption_values)
         outcome = validation_harness.run_validation_harness()
         print(outcome)
-
         # Teardown moved files
         rmtree(tmp_dir)
 

@@ -8,6 +8,7 @@
 import os
 import subprocess
 from abc import ABC, abstractmethod
+from enum import Enum, auto
 from typing import List, Tuple
 
 
@@ -111,4 +112,24 @@ class BaseValidationHarness(ABC):
         :param validation_output: Stdout from validation run
         :param validation_error: Stderr from validation run
         """
+
+class ValidationResult(Enum):
+    CORRECT = "Witness correct", "\033[92m"
+    SPURIOUS = "Witness spurious", "\033[91m"
+    UNKNOWN = "Witness could not be validated", "\033[93m"
+    def __new__(cls, *args, **kwds):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    # ignore the first param since it's already set by __new__
+    def __init__(self, _: str, colour: str = None):
+        self._colour_ = colour
+
+    def __str__(self):
+        return f'{self.colour}{self.value}\033[0m'
+
+    @property
+    def colour(self):
+        return self._colour_
 
