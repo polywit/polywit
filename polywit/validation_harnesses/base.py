@@ -7,33 +7,42 @@
 
 import os
 import subprocess
-from abc import ABC, abstractmethod
-from enum import Enum, auto
+from abc import ABC, abstractmethod, abstractproperty
+from enum import Enum
 from typing import List, Tuple
 
 
-class BaseValidationHarness(ABC):
+class ValidationHarness(ABC):
     """
-    The class BaseValidationHarness gives base functionality and definitions for
+    The class ValidationHarness gives base functionality and definitions for
     all the tests creation and compilation of the validation harness
     """
 
     def __init__(self, directory):
         """
-        The constructor of BaseValidationHarness collects information on the 
+        The constructor of ValidationHarness collects information on the 
         output directory
         :param directory: Directory that the harness will write to
         """
         self.directory = directory
-        self.validation_path = os.path.join(
-            self.directory,
-            'Verifier'
-        )
-        self.test_path = os.path.join(
-            self.directory,
-            'Test'
-        )
-        self.run_args = []
+    @property
+    @abstractmethod
+    def validation_path(self):
+        pass
+    @property
+    @abstractmethod
+    def test_path(self):
+        pass
+
+    @property
+    @abstractmethod
+    def compile_cmd(self):
+        pass
+
+    @property
+    @abstractmethod
+    def run_cmd(self):
+        pass
 
     @staticmethod
     def _read_data(path: str) -> List[str]:
@@ -102,7 +111,7 @@ class BaseValidationHarness(ABC):
         Runs the validation harness and reports the outcome of the validation execution
         :return: The validation result
         """
-        out, err = self._run_command(self.run_args)
+        out, err = self._run_command(self.run_cmd)
         return self._parse_validation_result(out, err)
 
     @abstractmethod
