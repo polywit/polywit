@@ -8,10 +8,10 @@
 import os
 from typing import Tuple
 
-from polywit.validation_harnesses.base import BaseValidationHarness, ValidationResult
+from polywit.validation_harnesses.base import ValidationHarness, ValidationResult
 
 
-class JavaValidationHarness(BaseValidationHarness):
+class JavaValidationHarness(ValidationHarness):
     """
     The class JavaValidationHarness manages all the tests creation and compilation
     of the validation harness
@@ -32,15 +32,26 @@ class JavaValidationHarness(BaseValidationHarness):
         :param directory: Directory that the harness will write to
         """
         super().__init__(directory)
-        self.verifier_path = os.path.join(
+
+    @property
+    def validation_path(self):
+        return os.path.join(
             self.directory,
             f'{self.VERIFIER_PACKAGE}/Verifier.java'
         )
-        self.test_path = os.path.join(
+    @property
+    def test_path(self):
+        return os.path.join(
             self.directory,
             'Test.java'
         )
-        self.run_args = ['java', '-cp', self.directory, '-ea', 'Test']
+
+    @property
+    def compile_cmd(self):
+        return ['java', '-cp', self.directory, '-ea', 'Test']
+    @property
+    def run_cmd(self):
+        return ['java', '-cp', self.directory, '-ea', 'Test']
 
     def build_validation_harness(self, assumptions) -> None:
         """
@@ -84,8 +95,7 @@ class JavaValidationHarness(BaseValidationHarness):
         Compiles the tests harness
         :return: stdout and stderr from compilation
         """
-        compile_args = ['javac', '-sourcepath', self.directory, self.test_path]
-        out, err = self._run_command(compile_args)
+        out, err = self._run_command(self.compile_args)
         return out, err
 
     def _parse_validation_result(self, validation_output, validation_error) -> None:

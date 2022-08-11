@@ -26,13 +26,8 @@ class JavaWitnessProcessor(WitnessProcessor):
         """
         Preprocess the witness to avoid any unformatted XML
         """
-        with open(self.witness_path, 'r', encoding='utf-8') as file:
-            data = file.read()
         # Check for malformed XML strings
-        cleaned_data = re.sub(r"\(\"(.*)<(.*)>(.*)\"\)", r'("\1&lt;\2&gt;\3")', data)
-        if cleaned_data != data:
-            path = "cleaned_witness.grapmhl"
-            self.witness_path = self.write_to_test_directory(path, cleaned_data)
+        self.witness = re.sub(r"\(\"(.*)<(.*)>(.*)\"\)", r'("\1&lt;\2&gt;\3")', self.witness)
 
     @staticmethod
     def _extract_value_from_assumption(assumption, regex):
@@ -70,12 +65,7 @@ class JavaWitnessProcessor(WitnessProcessor):
         """
         Extracts the assumptions from the witness
         """
-        try:
-            witness_file = nx.read_graphml(self.witness_path)
-        except Exception as exc:
-            raise ValueError('Witness file is not formatted correctly.') from exc
-
-        self.producer = witness_file.graph["producer"] if "producer" in witness_file.graph else None
+        self.producer = self._get_value_from_witness('producer')
         assumptions = []
         # GDart uses different syntax for numeric types
         if self.producer == 'GDart':
@@ -85,7 +75,7 @@ class JavaWitnessProcessor(WitnessProcessor):
             regex = r"= ((\S+)|(-?\d*\.?\d+[L]?)|(false|true|null))"
         for assumption_edge in filter(
                 lambda edge: ('assumption.scope' in edge[2]),
-                witness_file.edges(data=True)
+                self.witness.edges(data=True)
         ):
             data = assumption_edge[2]
             program = data['originFileName']
