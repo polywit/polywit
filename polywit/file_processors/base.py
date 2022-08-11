@@ -6,6 +6,12 @@
 """
 from abc import ABC, abstractmethod
 import os
+import logging
+import networkx as nx
+
+from polywit import SUPPORTED_LANGS
+
+
 class Processor(ABC):
     """
     An abstract class representing the base functionality for a processor
@@ -45,6 +51,8 @@ class FileProcessor(Processor):
     def __init__(self, test_directory):
         super().__init__(test_directory)
 
+
+    @abstractmethod
     def extract_nondet_mappings(self):
         """
         Stub for the extract nondet mappings method
@@ -59,6 +67,30 @@ class WitnessProcessor(Processor):
         super().__init__(test_directory)
         self.producer = None
         self.witness_path = witness_path
+        self.log = logging.getLogger()
+        try:
+            witness_file = nx.read_graphml(self.witness_path)
+        except Exception as exc:
+            raise ValueError('Witness file is not formatted correctly.') from exc
+        self.witness = witness_file
+
+        witness_type = self._get_value_from_witness('witness-type')
+        if witness_type != 'violation_witness':
+            if witness_type is None:
+                self.log.warning('violation_witness not in witness, potentially unsuported')
+            else:
+                raise ValueError(f'No support for {witness_type}')
+
+        sourcecodelang = self._get_value_from_witness('sourcecodelang')
+        if sourcecodelang not in SUPPORTED_LANGS:
+            if sourcecodelang is None:
+                self.log.warning('sourcecodelang not in witness, potentially unsuported')
+            else:
+                raise ValueError(f'No support for language {sourcecodelang}')
+
+
+    def _get_value_from_witness(self, key):
+        return self.witness.graph[key] if key in self.witness.graph else None
 
     @abstractmethod
     def extract_assumptions(self):
