@@ -83,16 +83,16 @@ def main():
         tmp_dir = tempfile.mkdtemp()
 
         # Instantiate file processors
-        jfp = JavaFileProcessor(tmp_dir, config['benchmark'], config['package_paths'])
-        wfp = JavaWitnessProcessor(tmp_dir, config['witness_file'])
+        file_processor = JavaFileProcessor(tmp_dir, config['benchmark'], config['package_paths'])
+        witness_processor = JavaWitnessProcessor(tmp_dir, config['witness_file'])
 
         # Need to preprocess and move to current directory to utilise mockito
-        jfp.preprocess()
-        wfp.preprocess()
+        file_processor.preprocess()
+        witness_processor.preprocess()
 
         # Process files to get type mapping and assumption list
-        assumptions = wfp.extract_assumptions()
-        nondet_mappings = jfp.extract_nondet_mappings()
+        assumptions = witness_processor.extract_assumptions()
+        nondet_mappings = file_processor.extract_nondet_mappings()
         assumption_values = filter_assumptions(nondet_mappings, assumptions)
         # Construct tests harness
         validation_harness = JavaValidationHarness(tmp_dir)
