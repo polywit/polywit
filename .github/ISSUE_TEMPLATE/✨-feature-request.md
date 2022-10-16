@@ -2,7 +2,7 @@
 name: "✨ Feature request"
 about: Suggest an idea for polywit
 title: " ✨ FEATURE REQUEST"
-labels: enhancement
+labels: documentation, enhancement
 assignees: JossMoff
 
 ---
