@@ -2,33 +2,34 @@
  This file is part of polywit, a poly-language execution-based violation-witness validator
  https://github.com/polywit/polywit.
 
- This module deals with the base building of the validation harness
+ This module deals with the base building of the test harness
 """
 
 import os
 import subprocess
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, Tuple
 
 
-class ValidationHarness(ABC):
+class PolywitTestResult:
+    pass
+
+
+class TestHarness(ABC):
     """
     The class ValidationHarness gives base functionality and definitions for
-    all the tests creation and compilation of the validation harness
+    all the tests creation and compilation of the test harness
     """
 
     def __init__(self, directory):
         """
-        The constructor of ValidationHarness collects information on the 
+        The constructor of TestHarness collects information on the
         output directory
         :param directory: Directory that the harness will write to
         """
         self.directory = directory
-    @property
-    @abstractmethod
-    def validation_path(self):
-        pass
+
     @property
     @abstractmethod
     def test_path(self):
@@ -56,7 +57,7 @@ class ValidationHarness(ABC):
         return content
 
     @staticmethod
-    def _write_data(path: str, data:  List[str]) -> None:
+    def _write_data(path: str, data: List[str]) -> None:
         """
         Handles writing data to a specific file
         :param path: Path of a file to write to
@@ -83,10 +84,10 @@ class ValidationHarness(ABC):
             err = proc.stderr.read().decode("utf-8")
         return out, err
 
-    def build_validation_harness(self, assumptions) -> None:
+    def build_test_harness(self, assumptions) -> None:
         """
-         Constructs and compiles the validation harness consisting of
-         the unit test and the test validation
+         Constructs and compiles the test harness consisting of
+         the unit test and the test verifier
         :param assumptions: Assumptions extracted from the witness
         """
         self._build_unit_test()
@@ -106,26 +107,28 @@ class ValidationHarness(ABC):
         :param assumptions: Assumptions extracted from the witness
         """
 
-    def run_validation_harness(self) -> str:
+    def run_test_harness(self) -> PolywitTestResult:
         """
-        Runs the validation harness and reports the outcome of the validation execution
-        :return: The validation result
+        Runs the test harness and reports the outcome of the test execution
+        :return: The test result
         """
         out, err = self._run_command(self.run_cmd)
-        return self._parse_validation_result(out, err)
+        return self._parse_test_result(out, err)
 
     @abstractmethod
-    def _parse_validation_result(self, validation_output, validation_error) -> None:
+    def _parse_test_result(self, test_output, test_error) -> PolywitTestResult:
         """
-        Parses the validation result and returns appropriate message
-        :param validation_output: Stdout from validation run
-        :param validation_error: Stderr from validation run
+        Parses the test result and returns appropriate message
+        :param test_output: Stdout from test run
+        :param test_error: Stderr from test run
         """
 
-class ValidationResult(Enum):
+
+class PolywitTestResult(Enum):
     CORRECT = "Witness correct", "\033[92m"
     SPURIOUS = "Witness spurious", "\033[91m"
     UNKNOWN = "Witness could not be validated", "\033[93m"
+
     def __new__(cls, *args, **kwds):
         obj = object.__new__(cls)
         obj._value_ = args[0]
@@ -141,4 +144,3 @@ class ValidationResult(Enum):
     @property
     def colour(self):
         return self._colour_
-

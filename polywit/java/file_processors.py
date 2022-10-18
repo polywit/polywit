@@ -11,7 +11,7 @@ import os
 import networkx as nx
 import javalang
 
-from polywit.file_processors.base import FileProcessor, WitnessProcessor
+from polywit.base import FileProcessor, WitnessProcessor
 
 
 class JavaWitnessProcessor(WitnessProcessor):
@@ -27,7 +27,25 @@ class JavaWitnessProcessor(WitnessProcessor):
         Preprocess the witness to avoid any unformatted XML
         """
         # Check for malformed XML strings
-        self.witness = re.sub(r"\(\"(.*)<(.*)>(.*)\"\)", r'("\1&lt;\2&gt;\3")', self.witness)
+        for index, assumption_edge in enumerate(filter(
+                lambda edge: ('assumption.scope' in edge[2]),
+                self.witness.edges(data=True)
+        )):
+            from_node = assumption_edge[0]
+            to_node = assumption_edge[1]
+            edge_data = assumption_edge[2]
+            cleaned_assumption = re.sub(
+                r'\(\"(.*)<(.*)>(.*)\"\)',
+                r'("\1&lt;\2&gt;\3")',
+                edge_data['assumption']
+            )
+            nx.set_edge_attributes(
+                self.witness,
+                {(from_node, to_node) :
+                     {'assumption' : cleaned_assumption}
+                }
+            )
+
 
     @staticmethod
     def _extract_value_from_assumption(assumption, regex):
@@ -78,8 +96,8 @@ class JavaWitnessProcessor(WitnessProcessor):
                 self.witness.edges(data=True)
         ):
             data = assumption_edge[2]
-            program = data['originFileName']
-            file_name = program[program.rfind("/") + 1: program.find(".java")]
+            file_name = self._get_file_name_from_path(data['originFileName'])
+            line_number = data['startline']
             scope = data['assumption.scope']
             if file_name not in scope:
                 continue
@@ -87,7 +105,7 @@ class JavaWitnessProcessor(WitnessProcessor):
             if assumption_value is not None:
                 if self.producer != 'GDart' and assumption_value == 'null':
                     assumption_value = None
-                assumptions.append(((file_name, data['startline']), assumption_value))
+                assumptions.append(((file_name, line_number), assumption_value))
         return assumptions
 
 

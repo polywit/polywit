@@ -4,6 +4,7 @@
 
  This module deals with the base definitions for processing of the witness and compilation units
 """
+
 from abc import ABC, abstractmethod
 import os
 import logging
@@ -43,6 +44,7 @@ class Processor(ABC):
 
         return new_path
 
+
 class FileProcessor(Processor):
     """
     An abstract class representing the base functionality for a file processor
@@ -51,12 +53,12 @@ class FileProcessor(Processor):
     def __init__(self, test_directory):
         super().__init__(test_directory)
 
-
     @abstractmethod
     def extract_nondet_mappings(self):
         """
         Stub for the extract nondet mappings method
         """
+
 
 class WitnessProcessor(Processor):
     """
@@ -71,23 +73,40 @@ class WitnessProcessor(Processor):
         try:
             witness_file = nx.read_graphml(self.witness_path)
         except Exception as exc:
-            raise ValueError('Witness file is not formatted correctly.') from exc
+            raise ValueError(f'Witness file is not formatted correctly. \n {exc}') from exc
         self.witness = witness_file
+        self.specification = self._get_value_from_witness('specification')
 
         witness_type = self._get_value_from_witness('witness-type')
         if witness_type != 'violation_witness':
-            if witness_type is None:
-                self.log.warning('violation_witness not in witness, potentially unsuported')
-            else:
-                raise ValueError(f'No support for {witness_type}')
+            raise ValueError(f'No support for {witness_type}')
 
-        sourcecodelang = self._get_value_from_witness('sourcecodelang')
-        if sourcecodelang not in SUPPORTED_LANGS:
-            if sourcecodelang is None:
-                self.log.warning('sourcecodelang not in witness, potentially unsuported')
-            else:
-                raise ValueError(f'No support for language {sourcecodelang}')
+        self.language = self._get_value_from_witness('sourcecodelang')
+        if self.language not in SUPPORTED_LANGS:
+            raise ValueError(f'No support for language {self.language}')
+        # Check witness is linear
+        self._check_witness_linearity()
 
+    def _check_witness_linearity(self):
+        """
+        Checks the witness is linear before building validator
+        """
+        entry_nodes = list(filter(
+            lambda nodes: nodes[1],
+            self.witness.nodes.data('isEntryNode', default=False)
+        ))
+        if len(entry_nodes) != 1:
+            raise ValueError('Witness does not have a single entry node')
+        self.entry_node = entry_nodes[0][0]
+        violation_nodes = list(filter(
+            lambda nodes: nodes[1],
+            self.witness.nodes.data('isViolationNode', default=False)
+        ))
+        if len(entry_nodes) != 1:
+            raise ValueError('Witness does not have a single violation node')
+        self.violation_node = violation_nodes[0][0]
+        if len(list(nx.all_simple_paths(self.witness, source=self.entry_node, target=self.violation_node))) != 1:
+            raise ValueError('Witness has multiple execution paths from source to sink')
 
     def _get_value_from_witness(self, key):
         return self.witness.graph[key] if key in self.witness.graph else None
@@ -97,3 +116,13 @@ class WitnessProcessor(Processor):
         """
         Extracts the assumptions from the witness
         """
+
+    @staticmethod
+    def _get_file_name_from_path(path):
+        """
+        Returns the file name
+        :param path: Path to file
+        :return: Base file name without the extension
+        """
+        base_name = os.path.basename(path)
+        return os.path.splitext(base_name)[0]

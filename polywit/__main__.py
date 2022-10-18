@@ -4,19 +4,15 @@
 
  This module deals with the main functionality of the tool
 """
+
 import os
 import sys
-import tempfile
-
-from shutil import rmtree
 
 import argparse
 
-from polywit.validation_harnesses.java import JavaValidationHarness
-from polywit.file_processors.java import JavaFileProcessor, JavaWitnessProcessor
-
-from polywit.file_processors.utils import filter_assumptions
 from polywit import __version__
+from polywit.java import JavaValidator
+
 
 
 def dir_path(path):
@@ -37,18 +33,19 @@ def create_argument_parser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser(
         description="""
-                   Validate a given Java program with a witness conforming to the appropriate SV-COMP
+                   Validate a given program with a witness conforming to the appropriate SV-COMP
                    exchange format.
                """,
     )
-
-    parser.add_argument(
+    subparsers = parser.add_subparsers(metavar='frontend', dest='language', help='Frontend language')
+    java_sub_parser = subparsers.add_parser('java', help='Use the java validator')
+    java_sub_parser.add_argument(
         'benchmark',
         type=dir_path,
         help="Path to the benchmark directory"
     )
 
-    parser.add_argument(
+    java_sub_parser.add_argument(
         '--packages',
         dest='package_paths',
         type=dir_path,
@@ -56,17 +53,13 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="Path to the packages used by the benchmark"
     )
 
-    parser.add_argument(
+    java_sub_parser.add_argument(
         '--witness',
         dest='witness_file',
         required=True,
         type=str,
         action="store",
         help='Path to the witness file. Must conform to the exchange format'
-    )
-
-    parser.add_argument(
-        "--version", action="version", version="%(prog)s " + __version__
     )
 
     return parser
@@ -77,30 +70,13 @@ def main():
     config = parser.parse_args(sys.argv[1:])
     config = vars(config)
     try:
-        print(f'polywit v{__version__}')
+        print(f'polywit: v{__version__}')
+        validator = JavaValidator(config)
 
-        # Create temporary directory for easier cleanup
-        tmp_dir = tempfile.mkdtemp()
-
-        # Instantiate file processors
-        file_processor = JavaFileProcessor(tmp_dir, config['benchmark'], config['package_paths'])
-        witness_processor = JavaWitnessProcessor(tmp_dir, config['witness_file'])
-
-        # Need to preprocess and move to current directory to utilise mockito
-        file_processor.preprocess()
-        witness_processor.preprocess()
-
-        # Process files to get type mapping and assumption list
-        assumptions = witness_processor.extract_assumptions()
-        nondet_mappings = file_processor.extract_nondet_mappings()
-        assumption_values = filter_assumptions(nondet_mappings, assumptions)
-        # Construct tests harness
-        validation_harness = JavaValidationHarness(tmp_dir)
-        validation_harness.build_validation_harness(assumption_values)
-        outcome = validation_harness.run_validation_harness()
-        print(outcome)
-        # Teardown moved files
-        rmtree(tmp_dir)
+        validator.preprocess()
+        assumptions = validator.extract_assumptions()
+        outcome = validator.execute_test_harness(assumptions)
+        print(f'polywit: {outcome}')
 
     except BaseException as err:
         print(f'polywit: Could not validate witness \n{err}')

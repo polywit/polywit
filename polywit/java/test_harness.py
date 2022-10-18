@@ -2,19 +2,19 @@
  This file is part of polywit, a poly-language execution-based violation-witness validator
  https://github.com/polywit/polywit.
 
- This module deals with the building of the validation harness for Java programs
+ This module deals with the building of the test harness for Java programs
 """
 
 import os
 from typing import Tuple
 
-from polywit.validation_harnesses.base import ValidationHarness, ValidationResult
+from polywit.base import TestHarness, PolywitTestResult
 
 
-class JavaValidationHarness(ValidationHarness):
+class JavaTestHarness(TestHarness):
     """
     The class JavaValidationHarness manages all the tests creation and compilation
-    of the validation harness
+    of the test harness
     """
     VERIFIER_PACKAGE = 'org/sosy_lab/sv_benchmarks'
     VERIFIER_RESOURCE_PATH = os.path.join(
@@ -34,11 +34,12 @@ class JavaValidationHarness(ValidationHarness):
         super().__init__(directory)
 
     @property
-    def validation_path(self):
+    def verifier_path(self):
         return os.path.join(
             self.directory,
             f'{self.VERIFIER_PACKAGE}/Verifier.java'
         )
+
     @property
     def test_path(self):
         return os.path.join(
@@ -48,18 +49,19 @@ class JavaValidationHarness(ValidationHarness):
 
     @property
     def compile_cmd(self):
-        return ['java', '-cp', self.directory, '-ea', 'Test']
+        return ['javac', '-sourcepath', self.directory, self.test_path]
+
     @property
     def run_cmd(self):
         return ['java', '-cp', self.directory, '-ea', 'Test']
 
-    def build_validation_harness(self, assumptions) -> None:
+    def build_test_harness(self, assumptions) -> None:
         """
-         Constructs and compiles the validator harness consisting of
+         Constructs and compiles the test harness consisting of
          the unit tests and the test verifier
         :param assumptions: Assumptions extracted from the witness
         """
-        super().build_validation_harness(assumptions)
+        super().build_test_harness(assumptions)
         _, _ = self._compile_test_harness()
 
     def _build_unit_test(self) -> None:
@@ -95,21 +97,21 @@ class JavaValidationHarness(ValidationHarness):
         Compiles the tests harness
         :return: stdout and stderr from compilation
         """
-        out, err = self._run_command(self.compile_args)
+        out, err = self._run_command(self.compile_cmd)
         return out, err
 
-    def _parse_validation_result(self, validation_output, validation_error) -> None:
+    def _parse_test_result(self, test_output, test_error) -> PolywitTestResult:
         """
-        Parses the validation result and returns appropriate message
-        :param validation_output: Stdout from validation run
-        :param validation_error: Stderr from validation run
+        Parses the test result and returns appropriate message
+        :param test_output: Stdout from test run
+        :param test_error: Stderr from test run
         """
         # Set output to be stderr if there is some erroneous output
-        validation_output = validation_error if validation_error else validation_output
-        if 'Exception in thread "main" java.lang.AssertionError' in validation_output:
-            result = ValidationResult.CORRECT
-        elif 'polywit: Witness Spurious' in validation_output:
-            result = ValidationResult.SPURIOUS
+        test_output = test_error if test_error else test_output
+        if 'Exception in thread "main" java.lang.AssertionError' in test_output:
+            result = PolywitTestResult.CORRECT
+        elif 'polywit: Witness Spurious' in test_output:
+            result = PolywitTestResult.SPURIOUS
         else:
-            result = ValidationResult.UNKNOWN
-        return f'polywit: {result}'
+            result = PolywitTestResult.UNKNOWN
+        return result
