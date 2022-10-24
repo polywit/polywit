@@ -11,7 +11,7 @@ import os
 import networkx as nx
 import javalang
 
-from polywit.file_processors.base import FileProcessor, WitnessProcessor
+from polywit.base import FileProcessor, WitnessProcessor
 
 
 class JavaWitnessProcessor(WitnessProcessor):
@@ -27,7 +27,22 @@ class JavaWitnessProcessor(WitnessProcessor):
         Preprocess the witness to avoid any unformatted XML
         """
         # Check for malformed XML strings
-        self.witness = re.sub(r"\(\"(.*)<(.*)>(.*)\"\)", r'("\1&lt;\2&gt;\3")', self.witness)
+        for _, assumption_edge in enumerate(filter(
+                lambda edge: ('assumption.scope' in edge[2]),
+                self.witness.edges(data=True)
+        )):
+            from_node = assumption_edge[0]
+            to_node = assumption_edge[1]
+            edge_data = assumption_edge[2]
+            cleaned_assumption = re.sub(
+                r'\(\"(.*)<(.*)>(.*)\"\)',
+                r'("\1&lt;\2&gt;\3")',
+                edge_data['assumption']
+            )
+            nx.set_edge_attributes(
+                self.witness,
+                {(from_node, to_node): {'assumption': cleaned_assumption}}
+            )
 
     @staticmethod
     def _extract_value_from_assumption(assumption, regex):
@@ -78,8 +93,8 @@ class JavaWitnessProcessor(WitnessProcessor):
                 self.witness.edges(data=True)
         ):
             data = assumption_edge[2]
-            program = data['originFileName']
-            file_name = program[program.rfind("/") + 1: program.find(".java")]
+            file_name = self._get_file_name_from_path(data['originFileName'])
+            line_number = data['startline']
             scope = data['assumption.scope']
             if file_name not in scope:
                 continue
@@ -87,10 +102,11 @@ class JavaWitnessProcessor(WitnessProcessor):
             if assumption_value is not None:
                 if self.producer != 'GDart' and assumption_value == 'null':
                     assumption_value = None
-                assumptions.append(((file_name, data['startline']), assumption_value))
+                assumptions.append(((file_name, line_number), assumption_value))
         return assumptions
 
 
+# noinspection PyUnresolvedReferences
 class JavaFileProcessor(FileProcessor):
     """
     A class representing the Java files processor
@@ -127,7 +143,7 @@ class JavaFileProcessor(FileProcessor):
                     package = self.package_paths[dir_exists.index(True)]
                     return list(glob.glob(package + "/**/*.java", recursive=True))
 
-            full_paths = ["{0}.java".format(os.path.join(dir, check_file)) for dir in self.package_paths]
+            full_paths = ["{0}.java".format(os.path.join(directory, check_file)) for directory in self.package_paths]
             files_exists = [os.path.exists(f_path) for f_path in full_paths]
             # Check there is only one definition for an import file and if so add to stack to check
             # for possible nondet calls
@@ -159,7 +175,7 @@ class JavaFileProcessor(FileProcessor):
             try:
                 tree = javalang.parse.parse(data)
             except javalang.parser.JavaSyntaxError as err:
-                print(err)
+                raise err
             for import_node in tree.imports:
                 files = self._check_valid_import(import_node.path)
                 for file in files:
@@ -168,9 +184,8 @@ class JavaFileProcessor(FileProcessor):
             # Look for nondet Calls
             for _, node in tree.filter(javalang.tree.MethodInvocation):
                 if (node is not None
-                    and node.qualifier is not None
-                    and 'Verifier' in node.qualifier
-                ):
+                        and node.qualifier is not None
+                        and 'Verifier' in node.qualifier):
                     nondet_type = node.member.replace('nondet', '')
                     types_map[(program_name, node.position.line)] = nondet_type.lower()
             # Check if any nondet calls are from returns from methods
@@ -178,9 +193,8 @@ class JavaFileProcessor(FileProcessor):
                 if node.body is None or len(node.body) == 0:
                     continue
                 statement = node.body[0]
-                if(isinstance(statement, javalang.tree.ReturnStatement)
-                    and (program_name, statement.position.line) in types_map
-                ):
+                if (isinstance(statement, javalang.tree.ReturnStatement)
+                        and (program_name, statement.position.line) in types_map):
                     nondet_functions_map[node.name] = (program_name, statement.position.line)
 
             # Add any nondet returning functions to list of nondet function calls
