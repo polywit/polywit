@@ -12,8 +12,26 @@ from enum import Enum
 from typing import List, Tuple
 
 
-class PolywitTestResult:
-    pass
+class PolywitTestResult(Enum):
+    CORRECT = "Witness correct", "\033[92m"
+    SPURIOUS = "Witness spurious", "\033[91m"
+    UNKNOWN = "Witness could not be validated", "\033[93m"
+
+    def __new__(cls, *args, **kwds):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    # ignore the first param since it's already set by __new__
+    def __init__(self, _: str, colour: str = None):
+        self._colour_ = colour
+
+    def __str__(self):
+        return f'{self.colour}{self.value}\033[0m'
+
+    @property
+    def colour(self):
+        return self._colour_
 
 
 class TestHarness(ABC):
@@ -74,7 +92,7 @@ class TestHarness(ABC):
     def _run_command(command: List[str]) -> Tuple[str, str]:
         """
         Handles running commands in subprocess
-        :param command: List of seperated command to run
+        :param command: List of separated command to run
         :return: stdout and stderr from command
         """
         with subprocess.Popen(command,
@@ -122,25 +140,3 @@ class TestHarness(ABC):
         :param test_output: Stdout from test run
         :param test_error: Stderr from test run
         """
-
-
-class PolywitTestResult(Enum):
-    CORRECT = "Witness correct", "\033[92m"
-    SPURIOUS = "Witness spurious", "\033[91m"
-    UNKNOWN = "Witness could not be validated", "\033[93m"
-
-    def __new__(cls, *args, **kwds):
-        obj = object.__new__(cls)
-        obj._value_ = args[0]
-        return obj
-
-    # ignore the first param since it's already set by __new__
-    def __init__(self, _: str, colour: str = None):
-        self._colour_ = colour
-
-    def __str__(self):
-        return f'{self.colour}{self.value}\033[0m'
-
-    @property
-    def colour(self):
-        return self._colour_
