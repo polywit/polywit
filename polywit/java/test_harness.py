@@ -19,11 +19,11 @@ class JavaTestHarness(TestHarness):
     VERIFIER_PACKAGE = 'org/sosy_lab/sv_benchmarks'
     VERIFIER_RESOURCE_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        'resources/java/Verifier.java'
+        'resources/Verifier.java'
     )
     TEST_RESOURCE_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        'resources/java/Test.java'
+        'resources/Test.java'
     )
 
     def __init__(self, directory):
