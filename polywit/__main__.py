@@ -14,7 +14,6 @@ from polywit import __version__
 from polywit.java import JavaValidator
 
 
-
 def dir_path(path):
     """
     Checks if a path is a valid directory
