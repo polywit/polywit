@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/polywit/polywit/main/images/readme-header.png" alt="Polywit Logo" style="width: 75%;"/><br>
+  <img src="doc/images/readme-header.png" alt="Polywit Logo" style="width: 75%;"/><br>
 </div>
 
 -----------------
@@ -14,7 +14,7 @@ Whilst most modern execution-based validators such as wit4java and CPA-wit2test 
 ### Framework
 For a general language polywit has the following architecture:
 <div align="center">
-  <img src="images/framework-architecture.png" alt="Polywit Architecture" style="width: 75%;"/><br>
+  <img src="doc/images/framework-architecture.png" alt="Polywit Architecture" style="width: 75%;"/><br>
 </div>
 
 - The **File Processor** deals with processing of the compilation units.
