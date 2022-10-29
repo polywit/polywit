@@ -11,14 +11,19 @@ Modern verification tools report a violation witness amidst verification if a bu
 
 Whilst most modern execution-based validators such as wit4java and CPA-wit2test focus on specific language, polywit aims to provide an extensible, feature rich framework to allow for easy language integration and validator quality.
 
-### Terminology
-- **position** - A position $p_i$ for a nondeterministic function call from a file $f_i$ and line number the function is called on $n_i$ is represented by the pair $(f_i, n_i)$ .
-- **assumption** - An assumption $a_i$ relates the position $p_i$ to the assumed value $v_i$ and is represented as the pair $(p_i, v_i)$.
-- **nondet type** - A nondet type for a nondeterministic function call is the return type of the function.
+### Framework
+For a general language polywit has the following architecture:
+<div align="center">
+  <img src="images/framework-architecture.png" alt="Polywit Architecture" style="width: 75%;"/><br>
+</div>
+
+- The **File Processor** deals with processing of the compilation units.
+- The **Witness Processor** deals with processing of the witness.
+- The **Test Harness** deals with construction and execution of a test to check the validity of the reported violation.
 ### Literature
 
 - [Wit4Java: A violation-witness validator for Java verifiers (competition contribution)](https://doi.org/10.1007/978-3-030-99527-0_36) by Wu, T., Schrammel, P., & Cordeiro, L. C. International Conference on Tools and Algorithms for the Construction and Analysis of Systems. Springer, Cham, 2022. Springer [doi.org/10.1007/978-3-030-99527-0_36](https://doi.org/10.1007/978-3-030-99527-0_36)
-### Usage
+## Usage
 ```
 usage: polywit [-h] frontend ...
 
