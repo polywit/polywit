@@ -12,7 +12,7 @@ Modern verification tools report a violation witness amidst verification if a bu
 Whilst most modern execution-based validators such as wit4java and CPA-wit2test focus on specific language, polywit aims to provide an extensible, feature rich framework to allow for easy language integration and validator quality.
 
 ### Framework
-For a general language polywit has the following architecture:
+For a general language, the polywit implementation has the following architecture:
 <div align="center">
   <img src="doc/images/framework-architecture.png" alt="Polywit Architecture" style="width: 75%;"/><br>
 </div>
