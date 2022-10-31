@@ -55,9 +55,9 @@ class Validator(ABC):
 
         :return: List of assumptions
         """
-        nondet_mappings = self.file_processor.extract_nondet_mappings()
+        position_type_map = self.file_processor.extract_position_type_map()
         assumptions = self.witness_processor.extract_assumptions()
-        return filter_assumptions(nondet_mappings, assumptions)
+        return filter_assumptions(position_type_map, assumptions)
 
     def execute_test_harness(self, assumptions: List[str]) -> PolywitTestResult:
         self.test_harness.build_test_harness(assumptions)

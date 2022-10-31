@@ -9,6 +9,7 @@ import os
 from typing import Tuple, List
 
 from polywit.base import TestHarness, PolywitTestResult
+from polywit.types import Assumption
 
 
 class JavaTestHarness(TestHarness):
@@ -56,7 +57,7 @@ class JavaTestHarness(TestHarness):
     def run_cmd(self):
         return ['java', '-cp', self.directory, '-ea', 'Test']
 
-    def build_test_harness(self, assumptions: List[str]) -> None:
+    def build_test_harness(self, assumptions: List[Assumption]) -> None:
         """
         Constructs and compiles the test harness consisting of
         the unit tests and the test verifier
@@ -74,7 +75,7 @@ class JavaTestHarness(TestHarness):
         test_data = self._read_data(self.TEST_RESOURCE_PATH)
         self._write_data(self.test_path, test_data)
 
-    def _build_test_verifier(self, assumptions: List[str]) -> None:
+    def _build_test_verifier(self, assumptions: List[Assumption]) -> None:
         """
         Constructs the tests verifier from a list of assumptions
         and Verifier.java
@@ -85,8 +86,10 @@ class JavaTestHarness(TestHarness):
             self.directory,
             f'{self.VERIFIER_PACKAGE}/Verifier.java'
         )
+        # We only need assumption values so extract them
+        assumption_values = list(map(lambda assumption: assumption[1], assumptions))
         # Map assumptions to string form, mapping None to null
-        string_assumptions = [f'"{a}"' if a is not None else 'null' for a in assumptions]
+        string_assumptions = [f'"{a}"' if a is not None else 'null' for a in assumption_values]
         verifier_data = self._read_data(self.VERIFIER_RESOURCE_PATH)
         # Replace empty assumptions list with extracted assumptions
         assumption_line = verifier_data.index('  static String[] assumptionList = {};\n')

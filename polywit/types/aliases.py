@@ -1,4 +1,4 @@
-from typing import TypeAlias, List, Tuple
+from typing import TypeAlias, Tuple
 
-Assumption: TypeAlias = Tuple[str, str]
-AssumptionList: TypeAlias = List[Assumption, str]
+Position: TypeAlias = Tuple[str, str]
+Assumption: TypeAlias = Tuple[Position, str]

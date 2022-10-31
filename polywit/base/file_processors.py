@@ -7,11 +7,11 @@
 
 from abc import ABC, abstractmethod
 import os
-from typing import Optional
+from typing import Optional, List
 
 import networkx as nx
 
-from polywit.types.aliases import Assumption, AssumptionList
+from polywit.types.aliases import Assumption, AssumptionList, Position
 
 
 class Processor(ABC):
@@ -56,7 +56,7 @@ class FileProcessor(Processor):
         super().__init__(test_directory)
 
     @abstractmethod
-    def extract_nondet_mappings(self) -> dict[Assumption, str]:
+    def extract_position_type_map(self) -> dict[Position, str]:
         """
         Stub for the extract nondet mappings method
         """
@@ -110,7 +110,7 @@ class WitnessProcessor(Processor):
         return self.witness.graph[key] if key in self.witness.graph else None
 
     @abstractmethod
-    def extract_assumptions(self) -> AssumptionList:
+    def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
         """

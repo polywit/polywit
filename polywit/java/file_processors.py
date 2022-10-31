@@ -14,7 +14,7 @@ import networkx as nx
 import javalang
 
 from polywit.base import FileProcessor, WitnessProcessor
-from polywit.types.aliases import Assumption, AssumptionList
+from polywit.types.aliases import Assumption, Position
 
 
 class JavaWitnessProcessor(WitnessProcessor):
@@ -80,7 +80,7 @@ class JavaWitnessProcessor(WitnessProcessor):
             assumption_value = 'NaN'
         return str(assumption_value)
 
-    def extract_assumptions(self) -> AssumptionList:
+    def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
         """
@@ -121,7 +121,7 @@ class JavaFileProcessor(FileProcessor):
         self.package_paths = package_paths
         self.source_files = list(glob.glob(self.benchmark_path + "/**/*.java", recursive=True))
 
-    def preprocess(self):
+    def preprocess(self) -> None:
         copy_tree(self.benchmark_path, self.test_directory)
         for package in self.package_paths:
             copy_tree(package, self.test_directory)
@@ -159,9 +159,9 @@ class JavaFileProcessor(FileProcessor):
                 return [full_paths[files_exists.index(True)]]
         return []
 
-    def extract_nondet_mappings(self) -> dict[Assumption, str]:
-        types_map: dict[Assumption, str] = {}
-        nondet_functions_map: dict[str, Assumption] = {}
+    def extract_position_type_map(self) -> dict[Position, str]:
+        position_type_map: dict[Position, str] = {}
+        nondet_functions_map: dict[str, Position] = {}
         extraction_stack = dict.fromkeys(self.source_files, 0)
         finished_set = {}
 
@@ -190,7 +190,7 @@ class JavaFileProcessor(FileProcessor):
                         and node.qualifier is not None
                         and 'Verifier' in node.qualifier):
                     nondet_type = node.member.replace('nondet', '')
-                    types_map[(program_name, node.position.line)] = nondet_type.lower()
+                    position_type_map[(program_name, node.position.line)] = nondet_type.lower()
 
             # Check if any nondet calls are from returns from methods
             for _, node in tree.filter(javalang.tree.MethodDeclaration):
@@ -198,13 +198,13 @@ class JavaFileProcessor(FileProcessor):
                     continue
                 statement = node.body[0]
                 if (isinstance(statement, javalang.tree.ReturnStatement)
-                        and (program_name, statement.position.line) in types_map):
+                        and (program_name, statement.position.line) in position_type_map):
                     nondet_functions_map[node.name] = (program_name, statement.position.line)
 
             # Add any nondet returning functions to list of nondet function calls
             for _, node in tree.filter(javalang.tree.MethodInvocation):
                 if node is not None and node.member in nondet_functions_map:
                     position = nondet_functions_map[node.member]
-                    types_map[(program_name, node.position.line)] = types_map[position]
+                    position_type_map[(program_name, node.position.line)] = position_type_map[position]
 
-        return types_map
+        return position_type_map
