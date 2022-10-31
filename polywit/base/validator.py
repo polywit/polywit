@@ -6,6 +6,7 @@
 """
 import tempfile
 from abc import ABC, abstractmethod
+from typing import List
 
 from polywit.base import WitnessProcessor, FileProcessor
 from polywit.utils import filter_assumptions
@@ -42,14 +43,22 @@ class Validator(ABC):
         pass
 
     def preprocess(self) -> None:
+        """
+        Run the preprocessing steps for the processors
+        """
         self.file_processor.preprocess()
         self.witness_processor.preprocess()
 
-    def extract_assumptions(self) -> list:
+    def extract_assumptions(self) -> List[str]:
+        """
+        Extracts the assumptions from the witness file
+
+        :return: List of assumptions
+        """
         nondet_mappings = self.file_processor.extract_nondet_mappings()
         assumptions = self.witness_processor.extract_assumptions()
         return filter_assumptions(nondet_mappings, assumptions)
 
-    def execute_test_harness(self, assumption_values) -> PolywitTestResult:
-        self.test_harness.build_test_harness(assumption_values)
+    def execute_test_harness(self, assumptions: List[str]) -> PolywitTestResult:
+        self.test_harness.build_test_harness(assumptions)
         return self.test_harness.run_test_harness()

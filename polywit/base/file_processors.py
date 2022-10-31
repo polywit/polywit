@@ -7,10 +7,11 @@
 
 from abc import ABC, abstractmethod
 import os
-import logging
+from typing import Optional
+
 import networkx as nx
 
-from polywit import SUPPORTED_LANGS
+from polywit.types.aliases import Assumption, AssumptionList
 
 
 class Processor(ABC):
@@ -22,7 +23,7 @@ class Processor(ABC):
         self.test_directory = test_directory
 
     @abstractmethod
-    def preprocess(self):
+    def preprocess(self) -> None:
         """
         Stub for the preprocess method
         """
@@ -30,6 +31,7 @@ class Processor(ABC):
     def write_to_test_directory(self, path, data):
         """
         Writes some data to the working directory at some given path offset
+
         :param path: The offset path from the working directory
         :param data: The data to be written
         :return: The new place the data was written to.
@@ -54,7 +56,7 @@ class FileProcessor(Processor):
         super().__init__(test_directory)
 
     @abstractmethod
-    def extract_nondet_mappings(self):
+    def extract_nondet_mappings(self) -> dict[Assumption, str]:
         """
         Stub for the extract nondet mappings method
         """
@@ -69,25 +71,21 @@ class WitnessProcessor(Processor):
         super().__init__(test_directory)
         self.producer = None
         self.witness_path = witness_path
-        self.log = logging.getLogger()
         try:
             witness_file = nx.read_graphml(self.witness_path)
         except Exception as exc:
             raise ValueError(f'Witness file is not formatted correctly. \n {exc}') from exc
         self.witness = witness_file
         self.specification = self._get_value_from_witness('specification')
-
+        self.language = self._get_value_from_witness('sourcecodelang')
+        # Check witness type is a violation witness
         witness_type = self._get_value_from_witness('witness-type')
         if witness_type != 'violation_witness':
             raise ValueError(f'No support for {witness_type}')
-
-        self.language = self._get_value_from_witness('sourcecodelang')
-        if self.language not in SUPPORTED_LANGS:
-            raise ValueError(f'No support for language {self.language}')
         # Check witness is linear
         self._check_witness_linearity()
 
-    def _check_witness_linearity(self):
+    def _check_witness_linearity(self) -> None:
         """
         Checks the witness is linear before building validator
         """
@@ -108,11 +106,11 @@ class WitnessProcessor(Processor):
         if len(list(nx.all_simple_paths(self.witness, source=self.entry_node, target=self.violation_node))) != 1:
             raise ValueError('Witness has multiple execution paths from source to sink')
 
-    def _get_value_from_witness(self, key):
+    def _get_value_from_witness(self, key: str) -> Optional[str]:
         return self.witness.graph[key] if key in self.witness.graph else None
 
     @abstractmethod
-    def extract_assumptions(self):
+    def extract_assumptions(self) -> AssumptionList:
         """
         Extracts the assumptions from the witness
         """

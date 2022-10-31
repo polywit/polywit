@@ -8,10 +8,13 @@ import glob
 import re
 from distutils.dir_util import copy_tree
 import os
+from typing import List
+
 import networkx as nx
 import javalang
 
 from polywit.base import FileProcessor, WitnessProcessor
+from polywit.types.aliases import Assumption, AssumptionList
 
 
 class JavaWitnessProcessor(WitnessProcessor):
@@ -45,9 +48,10 @@ class JavaWitnessProcessor(WitnessProcessor):
             )
 
     @staticmethod
-    def _extract_value_from_assumption(assumption, regex):
+    def _extract_value_from_assumption(assumption: Assumption, regex: str) -> str:
         """
         Extracts an assumption value using a regex
+
         :param assumption: The string containing the variable assignment to have value extracted
         :param regex: The regular expression used to extract the value
         :return: The extracted assumption value or None if not there
@@ -74,9 +78,9 @@ class JavaWitnessProcessor(WitnessProcessor):
         # TODO Extract into new parser class and have methods handling specific edge values
         if assumption_value == 'Double.NaN':
             assumption_value = 'NaN'
-        return assumption_value
+        return str(assumption_value)
 
-    def extract_assumptions(self):
+    def extract_assumptions(self) -> AssumptionList:
         """
         Extracts the assumptions from the witness
         """
@@ -106,7 +110,6 @@ class JavaWitnessProcessor(WitnessProcessor):
         return assumptions
 
 
-# noinspection PyUnresolvedReferences
 class JavaFileProcessor(FileProcessor):
     """
     A class representing the Java files processor
@@ -123,7 +126,7 @@ class JavaFileProcessor(FileProcessor):
         for package in self.package_paths:
             copy_tree(package, self.test_directory)
 
-    def _check_valid_import(self, import_line):
+    def _check_valid_import(self, import_line: str) -> List[str]:
         check_file = import_line.strip().replace(".", "/").replace(";", "").replace("import", "").replace(' ', '')
         if not check_file.startswith('java'):
             # Check in working directory
@@ -156,9 +159,9 @@ class JavaFileProcessor(FileProcessor):
                 return [full_paths[files_exists.index(True)]]
         return []
 
-    def extract_nondet_mappings(self):
-        types_map = {}
-        nondet_functions_map = {}
+    def extract_nondet_mappings(self) -> dict[Assumption, str]:
+        types_map: dict[Assumption, str] = {}
+        nondet_functions_map: dict[str, Assumption] = {}
         extraction_stack = dict.fromkeys(self.source_files, 0)
         finished_set = {}
 
@@ -188,6 +191,7 @@ class JavaFileProcessor(FileProcessor):
                         and 'Verifier' in node.qualifier):
                     nondet_type = node.member.replace('nondet', '')
                     types_map[(program_name, node.position.line)] = nondet_type.lower()
+
             # Check if any nondet calls are from returns from methods
             for _, node in tree.filter(javalang.tree.MethodDeclaration):
                 if node.body is None or len(node.body) == 0:

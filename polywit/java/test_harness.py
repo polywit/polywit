@@ -6,7 +6,7 @@
 """
 
 import os
-from typing import Tuple
+from typing import Tuple, List
 
 from polywit.base import TestHarness, PolywitTestResult
 
@@ -29,6 +29,7 @@ class JavaTestHarness(TestHarness):
     def __init__(self, directory):
         """
         The constructor of TestBuilder collects information on the output directory
+
         :param directory: Directory that the harness will write to
         """
         super().__init__(directory)
@@ -55,13 +56,15 @@ class JavaTestHarness(TestHarness):
     def run_cmd(self):
         return ['java', '-cp', self.directory, '-ea', 'Test']
 
-    def build_test_harness(self, assumptions) -> None:
+    def build_test_harness(self, assumptions: List[str]) -> None:
         """
-         Constructs and compiles the test harness consisting of
-         the unit tests and the test verifier
+        Constructs and compiles the test harness consisting of
+        the unit tests and the test verifier
+
         :param assumptions: Assumptions extracted from the witness
         """
-        super().build_test_harness(assumptions)
+        self._build_unit_test()
+        self._build_test_verifier(assumptions)
         _, _ = self._compile_test_harness()
 
     def _build_unit_test(self) -> None:
@@ -71,10 +74,11 @@ class JavaTestHarness(TestHarness):
         test_data = self._read_data(self.TEST_RESOURCE_PATH)
         self._write_data(self.test_path, test_data)
 
-    def _build_test_verifier(self, assumptions) -> None:
+    def _build_test_verifier(self, assumptions: List[str]) -> None:
         """
         Constructs the tests verifier from a list of assumptions
         and Verifier.java
+
         :param assumptions: Assumptions extracted from the witness
         """
         verifier_path = os.path.join(
@@ -95,14 +99,16 @@ class JavaTestHarness(TestHarness):
     def _compile_test_harness(self) -> Tuple[str, str]:
         """
         Compiles the tests harness
+
         :return: stdout and stderr from compilation
         """
         out, err = self._run_command(self.compile_cmd)
         return out, err
 
-    def _parse_test_result(self, test_output, test_error) -> PolywitTestResult:
+    def _parse_test_result(self, test_output: str, test_error: str) -> PolywitTestResult:
         """
         Parses the test result and returns appropriate message
+
         :param test_output: Stdout from test run
         :param test_error: Stderr from test run
         """
