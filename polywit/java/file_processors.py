@@ -26,23 +26,12 @@ class JavaWitnessProcessor(WitnessProcessor):
         """
         Preprocess the witness to avoid any unformatted XML
         """
+        with open(self.witness_path, 'r', encoding='utf-8') as file:
+            data = file.read()
         # Check for malformed XML strings
-        for _, assumption_edge in enumerate(filter(
-                lambda edge: ('assumption.scope' in edge[2]),
-                self.witness.edges(data=True)
-        )):
-            from_node = assumption_edge[0]
-            to_node = assumption_edge[1]
-            edge_data = assumption_edge[2]
-            cleaned_assumption = re.sub(
-                r'\(\"(.*)<(.*)>(.*)\"\)',
-                r'("\1&lt;\2&gt;\3")',
-                edge_data['assumption']
-            )
-            nx.set_edge_attributes(
-                self.witness,
-                {(from_node, to_node): {'assumption': cleaned_assumption}}
-            )
+        cleaned_data = re.sub(r"\(\"(.*)<(.*)>(.*)\"\)", r'("\1&lt;\2&gt;\3")', data)
+        self.witness = nx.parse_graphml(cleaned_data)
+        super().preprocess()
 
     @staticmethod
     def _extract_value_from_assumption(assumption, regex):
