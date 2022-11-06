@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 import os
 import networkx as nx
 
-from polywit.types.aliases import Assumption, AssumptionList, Position
+from polywit.types.aliases import Assumption, Position
 
 
 class Processor(ABC):
