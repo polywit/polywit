@@ -7,6 +7,7 @@ As seen in the `README`, a general language validator in polywit has the followi
 The package `polywit/base` has the base abstract classes for each component the rest of this document will detail what needs implementing for a new language.
 
 ## Validator
+The `Validator` is the host for the 3 main components in the diagram. It takes the configuration from the frontend as an argument and this is used to create the 3 components.
 
 
 ## File Processor 
