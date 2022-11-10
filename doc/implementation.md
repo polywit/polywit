@@ -34,7 +34,7 @@ The test harness deals with construction and execution of a test to check the va
 The test harness takes one constructor parameter, `directory` which is the directory where all the processed files from the processors are located.
 
 By default, the test harness has a single defined method:
-- `run_test_harness` - This runs the class variable `run_args` which desrcrive how the test harness should be run  as a subprocess.
+- `run_test_harness` - This runs the class variable `run_args` which desrcribe how the test harness should be run  as a subprocess.
 
 To implement for a specific language, two functions must be defined:
 - `build_test_harness` - This deals with the building and compilation of test harness so it in the state to run. It takes the assumptions as a parameter.
