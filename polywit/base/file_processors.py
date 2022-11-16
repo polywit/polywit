@@ -9,6 +9,8 @@ from abc import ABC, abstractmethod
 import os
 import networkx as nx
 
+from polywit.types.aliases import Position
+
 
 class Processor(ABC):
     """
@@ -19,7 +21,7 @@ class Processor(ABC):
         self.test_directory = test_directory
 
     @abstractmethod
-    def preprocess(self):
+    def preprocess(self) -> None:
         """
         Stub for the preprocess method
         """
@@ -27,6 +29,7 @@ class Processor(ABC):
     def write_to_test_directory(self, path, data):
         """
         Writes some data to the working directory at some given path offset
+
         :param path: The offset path from the working directory
         :param data: The data to be written
         :return: The new place the data was written to.
@@ -51,7 +54,7 @@ class FileProcessor(Processor):
         super().__init__(test_directory)
 
     @abstractmethod
-    def extract_nondet_mappings(self):
+    def extract_position_type_map(self) -> dict[Position, str]:
         """
         Stub for the extract nondet mappings method
         """
@@ -75,7 +78,7 @@ class WitnessProcessor(Processor):
             except Exception as exc:
                 raise ValueError(f'Witness file is not formatted correctly. \n {exc}') from exc
         self.specification = self._get_value_from_witness('specification')
-
+        # Check witness type is a violation witness
         witness_type = self._get_value_from_witness('witness-type')
         if witness_type != 'violation_witness':
             raise ValueError(f'No support for {witness_type}')

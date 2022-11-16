@@ -8,10 +8,13 @@ import glob
 import re
 from distutils.dir_util import copy_tree
 import os
+from typing import List
+
 import networkx as nx
 import javalang
 
 from polywit.base import FileProcessor, WitnessProcessor
+from polywit.types.aliases import Assumption, Position
 
 
 class JavaWitnessProcessor(WitnessProcessor):
@@ -34,9 +37,10 @@ class JavaWitnessProcessor(WitnessProcessor):
         super().preprocess()
 
     @staticmethod
-    def _extract_value_from_assumption(assumption, regex):
+    def _extract_value_from_assumption(assumption: Assumption, regex: str) -> str:
         """
         Extracts an assumption value using a regex
+
         :param assumption: The string containing the variable assignment to have value extracted
         :param regex: The regular expression used to extract the value
         :return: The extracted assumption value or None if not there
@@ -63,9 +67,9 @@ class JavaWitnessProcessor(WitnessProcessor):
         # TODO Extract into new parser class and have methods handling specific edge values
         if assumption_value == 'Double.NaN':
             assumption_value = 'NaN'
-        return assumption_value
+        return str(assumption_value)
 
-    def extract_assumptions(self):
+    def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
         """
@@ -95,7 +99,6 @@ class JavaWitnessProcessor(WitnessProcessor):
         return assumptions
 
 
-# noinspection PyUnresolvedReferences
 class JavaFileProcessor(FileProcessor):
     """
     A class representing the Java files processor
@@ -107,12 +110,12 @@ class JavaFileProcessor(FileProcessor):
         self.package_paths = package_paths
         self.source_files = list(glob.glob(self.benchmark_path + "/**/*.java", recursive=True))
 
-    def preprocess(self):
+    def preprocess(self) -> None:
         copy_tree(self.benchmark_path, self.test_directory)
         for package in self.package_paths:
             copy_tree(package, self.test_directory)
 
-    def _check_valid_import(self, import_line):
+    def _check_valid_import(self, import_line: str) -> List[str]:
         check_file = import_line.strip().replace(".", "/").replace(";", "").replace("import", "").replace(' ', '')
         if not check_file.startswith('java'):
             # Check in working directory
@@ -145,9 +148,9 @@ class JavaFileProcessor(FileProcessor):
                 return [full_paths[files_exists.index(True)]]
         return []
 
-    def extract_nondet_mappings(self):
-        types_map = {}
-        nondet_functions_map = {}
+    def extract_position_type_map(self) -> dict[Position, str]:
+        position_type_map: dict[Position, str] = {}
+        nondet_functions_map: dict[str, Position] = {}
         extraction_stack = dict.fromkeys(self.source_files, 0)
         finished_set = {}
 
@@ -176,20 +179,21 @@ class JavaFileProcessor(FileProcessor):
                         and node.qualifier is not None
                         and 'Verifier' in node.qualifier):
                     nondet_type = node.member.replace('nondet', '')
-                    types_map[(program_name, node.position.line)] = nondet_type.lower()
+                    position_type_map[(program_name, node.position.line)] = nondet_type.lower()
+
             # Check if any nondet calls are from returns from methods
             for _, node in tree.filter(javalang.tree.MethodDeclaration):
                 if node.body is None or len(node.body) == 0:
                     continue
                 statement = node.body[0]
                 if (isinstance(statement, javalang.tree.ReturnStatement)
-                        and (program_name, statement.position.line) in types_map):
+                        and (program_name, statement.position.line) in position_type_map):
                     nondet_functions_map[node.name] = (program_name, statement.position.line)
 
             # Add any nondet returning functions to list of nondet function calls
             for _, node in tree.filter(javalang.tree.MethodInvocation):
                 if node is not None and node.member in nondet_functions_map:
                     position = nondet_functions_map[node.member]
-                    types_map[(program_name, node.position.line)] = types_map[position]
+                    position_type_map[(program_name, node.position.line)] = position_type_map[position]
 
-        return types_map
+        return position_type_map

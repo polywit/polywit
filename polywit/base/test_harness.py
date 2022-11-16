@@ -17,7 +17,7 @@ class PolywitTestResult(Enum):
     SPURIOUS = "Witness spurious", "\033[91m"
     UNKNOWN = "Witness could not be validated", "\033[93m"
 
-    def __new__(cls, *args, **kwds):
+    def __new__(cls, *args, **kwargs):
         obj = object.__new__(cls)
         obj._value_ = args[0]
         return obj
@@ -36,7 +36,7 @@ class PolywitTestResult(Enum):
 
 class TestHarness(ABC):
     """
-    The class ValidationHarness gives base functionality and definitions for
+    The class TestHarness gives base functionality and definitions for
     all the tests creation and compilation of the test harness
     """
 
@@ -44,6 +44,7 @@ class TestHarness(ABC):
         """
         The constructor of TestHarness collects information on the
         output directory
+
         :param directory: Directory that the harness will write to
         """
         self.directory = directory
@@ -92,6 +93,7 @@ class TestHarness(ABC):
     def _run_command(command: List[str]) -> Tuple[str, str]:
         """
         Handles running commands in subprocess
+
         :param command: List of separated command to run
         :return: stdout and stderr from command
         """
@@ -102,41 +104,27 @@ class TestHarness(ABC):
             err = proc.stderr.read().decode("utf-8")
         return out, err
 
-    def build_test_harness(self, assumptions) -> None:
-        """
-         Constructs and compiles the test harness consisting of
-         the unit test and the test verifier
-        :param assumptions: Assumptions extracted from the witness
-        """
-        self._build_unit_test()
-        self._build_test_verifier(assumptions)
-
     @abstractmethod
-    def _build_unit_test(self) -> None:
+    def build_test_harness(self, assumptions: List[str]) -> None:
         """
-        Constructs the unit tests from Test.java
+        Constructs and compiles the test harness
         """
-
-    @abstractmethod
-    def _build_test_verifier(self, assumptions) -> None:
-        """
-        Constructs the tests verifier from a list of assumptions
-        and Verifier.java
-        :param assumptions: Assumptions extracted from the witness
-        """
+        pass
 
     def run_test_harness(self) -> PolywitTestResult:
         """
         Runs the test harness and reports the outcome of the test execution
+
         :return: The test result
         """
         out, err = self._run_command(self.run_cmd)
         return self._parse_test_result(out, err)
 
     @abstractmethod
-    def _parse_test_result(self, test_output, test_error) -> PolywitTestResult:
+    def _parse_test_result(self, test_output: str, test_error: str) -> PolywitTestResult:
         """
         Parses the test result and returns appropriate message
+
         :param test_output: Stdout from test run
         :param test_error: Stderr from test run
         """
