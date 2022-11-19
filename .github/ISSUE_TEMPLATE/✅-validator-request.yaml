@@ -1,0 +1,55 @@
+name: "✅ Validator Request"
+description: Suggest a new language implementation
+title: "✅: VALIDATOR"
+labels: [documentation, enhancement, help wanted]
+
+body:
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Language Proposal
+      description: >
+        Please provide a clear and concise proposal for the new language, covering methods for getting witnesses to validate"
+      placeholder: >
+        I wish polywit had support for String types in Java.
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Frontend Behaviour
+      description: >
+        Please provide an example of how the frontend will behave
+      placeholder: >
+        polywit lang BENCHMARK --witness WITNESS
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: FileProcessor Implementation
+      description: >
+        Please provide a brief overview of how the FileProcessor will extract the positions and types from the benchmarks.
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: WitnessProcessor Implementation
+      description: >
+        Please provide a brief overview of how the WitnessProcessor will extract the assumptions from the witness.
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: TestHarness Implementation
+      description: >
+        Please provide a brief overview of how the TestHarness will be constructed and executed.
+      placeholder: >
+        We will construct a Test file that executes the Main class with the following commands:
+        # Compilation Command
+        javac -sourcepath directory Test.java
+        # Execution Command
+        javac -cp directory Test
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: >
+        Please provide any relevant GitHub issues, code examples or references that help describe and support
+        the feature request.
