@@ -1,0 +1,53 @@
+name: "✨ Feature request"
+description: Suggest an idea for polywit
+title: "✨: FEATURE"
+labels: [enhancement]
+
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Feature Type
+      description: Please check what type of feature request you would like to propose.
+      options:
+        - label: >
+            Adding generic functionality to polywit
+        - label: >
+            Adding language specific functionality to polywit
+        - label: >
+            Changing existing functionality in polywit
+        - label: >
+            Removing functionality from polywit
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem Description
+      description: >
+        Please provide a clear and concise description of what you want to happen, e.g. "I wish I could use polywit to ..."
+      placeholder: >
+        I wish polywit had support for String types in Java.
+    validations:
+      required: true
+  - type: textarea
+    id: feature
+    attributes:
+      label: Feature Description
+      description: >
+        Please describe how the new feature would be implemented, using pseudocode if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: alternative
+    attributes:
+      label: Alternative Solutions
+      description: >
+        Please describe any alternative solutions or features you've considered
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: >
+        Please provide any relevant GitHub issues, code examples or references that help describe and support
+        the feature request.
