@@ -1,3 +1,3 @@
-networkx==2.8.7
+networkx==2.8.8
 javalang==0.13.0
 flake8==5.0.4
