@@ -23,19 +23,19 @@ body:
       placeholder: >
         polywit lang BENCHMARK --witness WITNESS
   - type: textarea
-    id: behaviour
+    id: fileprocessor
     attributes:
       label: FileProcessor Implementation
       description: >
         Please provide a brief overview of how the FileProcessor will extract the positions and types from the benchmarks.
   - type: textarea
-    id: behaviour
+    id: witnessprocessor
     attributes:
       label: WitnessProcessor Implementation
       description: >
         Please provide a brief overview of how the WitnessProcessor will extract the assumptions from the witness.
   - type: textarea
-    id: behaviour
+    id: testharness
     attributes:
       label: TestHarness Implementation
       description: >
