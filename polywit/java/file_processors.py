@@ -116,7 +116,11 @@ class JavaFileProcessor(FileProcessor):
             copy_tree(package, self.test_directory)
 
     def _check_valid_import(self, import_line: str) -> List[str]:
-        check_file = import_line.strip().replace(".", "/").replace(";", "").replace("import", "").replace(' ', '')
+        check_file = import_line.strip()\
+            .replace(".", "/")\
+            .replace(";", "")\
+            .replace("import", "")\
+            .replace(' ', '')
         if not check_file.startswith('java'):
             # Check in working directory
             files_exists = [source_f.endswith("{0}.java".format(check_file)) for source_f in self.source_files]

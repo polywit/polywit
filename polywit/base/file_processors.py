@@ -82,11 +82,6 @@ class WitnessProcessor(Processor):
         witness_type = self._get_value_from_witness('witness-type')
         if witness_type != 'violation_witness':
             raise ValueError(f'No support for {witness_type}')
-
-        # TODO: How to deal with missing langs
-        #self.language = self._get_value_from_witness('sourcecodelang')
-        #if self.language not in SUPPORTED_LANGS:
-        #    raise ValueError(f'No support for language {self.language}')
         # Check witness is linear
         self._check_witness_linearity()
 

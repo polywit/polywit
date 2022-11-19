@@ -40,8 +40,16 @@ def create_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version", action="version", version=f'polywit: v{__version__}'
     )
-    subparsers = parser.add_subparsers(metavar='frontend', dest='language', help='Frontend language')
-    java_sub_parser = subparsers.add_parser('java', help='Use the java validator')
+    subparsers = parser.add_subparsers(
+        metavar='frontend',
+        dest='language',
+        help='Frontend language'
+    )
+    java_sub_parser = subparsers.add_parser(
+        'java',
+        help='Use the java validator'
+    )
+
     java_sub_parser.add_argument(
         'benchmark',
         type=dir_path,
