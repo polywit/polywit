@@ -1,2 +1,2 @@
-__version__ = "0.2.0"
+__version__ = "v1.0.0rc0"
 SUPPORTED_LANGS = ['Java']
