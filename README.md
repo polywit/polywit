@@ -5,13 +5,16 @@
 -----------------
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/14a640b506d146179d1ef26c30cbbeb4)](https://www.codacy.com/gh/polywit/polywit/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=polywit/polywit&amp;utm_campaign=Badge_Grade)
-
+[![PyPI version](https://badge.fury.io/py/polywit.svg)](https://badge.fury.io/py/polywit)
+[![PyPI download month](https://img.shields.io/pypi/dm/polywit.svg)](https://pypi.python.org/pypi/polywit/)
+![Python](https://img.shields.io/badge/python-3.10-orange.svg)
 ### Description
 Modern verification tools report a violation witness amidst verification if a bug is encountered. Polywit employs execution-based validation to check the validity of the counterexample. This process involves extracting information on the assumptions of the verifier from the standardized exchange format for violation witnesses and building a test harness to provide a concrete execution of the program. The tool then executes the test harness on the code under verification and can either confirm or reject the violation witness if the relevant assertion is reached.
 
 Whilst most modern execution-based validators such as wit4java and CPA-wit2test focus on specific language, polywit aims to provide an extensible, feature rich framework to allow for easy language integration and validator quality.
 
 ### Framework
+
 For a general language, the polywit implementation has the following architecture:
 <div align="center">
   <img src="https://raw.githubusercontent.com/polywit/polywit/main/doc/images/framework-architecture.png" alt="Polywit Architecture" style="width: 75%;"/><br>
@@ -20,10 +23,11 @@ For a general language, the polywit implementation has the following architectur
 - The **File Processor** deals with processing of the compilation units.
 - The **Witness Processor** deals with processing of the witness.
 - The **Test Harness** deals with construction and execution of a test to check the validity of the reported violation.
+
 ### Literature
 
 - [Wit4Java: A violation-witness validator for Java verifiers (competition contribution)](https://doi.org/10.1007/978-3-030-99527-0_36) by Wu, T., Schrammel, P., & Cordeiro, L. C. International Conference on Tools and Algorithms for the Construction and Analysis of Systems. Springer, Cham, 2022. Springer [doi.org/10.1007/978-3-030-99527-0_36](https://doi.org/10.1007/978-3-030-99527-0_36)
-## Usage
+### Usage
 ```
 usage: polywit [-h] frontend ...
 
