@@ -12,7 +12,7 @@ authors:
   - family-names: Schrammel
     given-names: Peter
     orcid: https://orcid.org/0000-0002-5713-1381
-title: "polywit: The poly-language execution-based violation-witness validator"
+title: "Polywit: The poly-language execution-based violation-witness validator"
 license: MIT
 license-url: "https://github.com/polywit/polywit/blob/main/LICENSE"
 repository-code: "https://github.com/polywit/polywit"
