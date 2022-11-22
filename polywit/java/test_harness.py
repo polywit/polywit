@@ -14,7 +14,7 @@ from polywit.types import Assumption
 
 class JavaTestHarness(TestHarness):
     """
-    The class JavaValidationHarness manages all the tests creation and compilation
+    The class JavaTestHarness manages all the tests creation and compilation
     of the test harness
     """
     VERIFIER_PACKAGE = 'org/sosy_lab/sv_benchmarks'
@@ -29,7 +29,7 @@ class JavaTestHarness(TestHarness):
 
     def __init__(self, directory):
         """
-        The constructor of TestBuilder collects information on the output directory
+        The constructor of JavaTestHarness collects information on the output directory
 
         :param directory: Directory that the harness will write to
         """
