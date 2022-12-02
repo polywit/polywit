@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from polywit.base import WitnessProcessor, FileProcessor
+from polywit.types import Assumption
 from polywit.utils import filter_assumptions
 from polywit.base import TestHarness, PolywitTestResult
 
@@ -49,7 +50,7 @@ class Validator(ABC):
         self.file_processor.preprocess()
         self.witness_processor.preprocess()
 
-    def extract_assumptions(self) -> List[str]:
+    def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness file
 
