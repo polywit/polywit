@@ -1,24 +1,24 @@
 from polywit.base import Validator, FileProcessor, WitnessProcessor, TestHarness
-from polywit.java import JavaFileProcessor, JavaWitnessProcessor, JavaTestHarness
+from polywit.kotlin import KotlinFileProcessor, KotlinWitnessProcessor, KotlinTestHarness
 
 
-class JavaValidator(Validator):
+class KotlinValidator(Validator):
     def __init__(self, config, directory=None):
         """
         The constructor of Validator collects information of output directory is specified
         :param directory: Directory that the test harness will be written to.
         """
         super().__init__(config, directory=directory)
-        self._file_processor = JavaFileProcessor(
+        self._file_processor = KotlinFileProcessor(
             self.directory,
             self.config['benchmark'],
             self.config['package_paths']
         )
-        self._witness_processor = JavaWitnessProcessor(
+        self._witness_processor = KotlinWitnessProcessor(
             self.directory,
             self.config['witness_file']
         )
-        self._test_harness = JavaTestHarness(self.directory)
+        self._test_harness = KotlinTestHarness(self.directory)
 
     @property
     def file_processor(self) -> FileProcessor:
