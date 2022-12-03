@@ -111,20 +111,35 @@ class TestHarness(ABC):
         """
         pass
 
+    @abstractmethod
     def run_test_harness(self) -> PolywitTestResult:
         """
         Runs the test harness and reports the outcome of the test execution
 
         :return: The test result
         """
-        out, err = self._run_command(self.run_cmd)
-        return self._parse_test_result(out, err)
 
-    @abstractmethod
-    def _parse_test_result(self, test_output: str, test_error: str) -> PolywitTestResult:
+    def _parse_test_result(self,
+                           test_output: str,
+                           test_error: str,
+                           correct_output: str,
+                           incorrect_output: str) -> PolywitTestResult:
         """
         Parses the test result and returns appropriate message
 
         :param test_output: Stdout from test run
         :param test_error: Stderr from test run
+        :param correct_output: Output fragment expected from a correct violation
+        :param incorrect_output: Output fragment expected from an incorrect violation
+
+        :return: Formatted output
         """
+        # Set output to be stderr if there is some erroneous output
+        test_output = test_error if test_error else test_output
+        if correct_output in test_output:
+            result = PolywitTestResult.CORRECT
+        elif incorrect_output in test_output:
+            result = PolywitTestResult.SPURIOUS
+        else:
+            result = PolywitTestResult.UNKNOWN
+        return result

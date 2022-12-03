@@ -58,12 +58,19 @@ class KotlinTestHarness(TestHarness):
         )
 
     @property
+    def jar_path(self):
+        return os.path.join(
+            self.directory,
+            'Test.jar'
+        )
+
+    @property
     def compile_cmd(self):
-        return ['kotlinc', self.test_path, self.main_path, self.verifier_path, '-include-runtime', '-d', 'Test.jar']
+        return ['kotlinc', self.test_path, self.main_path, self.verifier_path, '-include-runtime', '-d', self.jar_path]
 
     @property
     def run_cmd(self):
-        return ['java', '-cp', self.directory, '-jar', 'Test.jar']
+        return ['java', '-jar', self.jar_path]
 
     def build_test_harness(self, assumptions: List[Assumption]) -> None:
         """
@@ -116,19 +123,16 @@ class KotlinTestHarness(TestHarness):
         out, err = self._run_command(self.compile_cmd)
         return out, err
 
-    def _parse_test_result(self, test_output: str, test_error: str) -> PolywitTestResult:
+    def run_test_harness(self) -> PolywitTestResult:
         """
-        Parses the test result and returns appropriate message
+        Runs the test harness and reports the outcome of the test execution
 
-        :param test_output: Stdout from test run
-        :param test_error: Stderr from test run
+        :return: The test result
         """
-        # Set output to be stderr if there is some erroneous output
-        test_output = test_error if test_error else test_output
-        if 'java.lang.AssertionError\n\tat MainKt.polywit_main' in test_output:
-            result = PolywitTestResult.CORRECT
-        elif 'polywit: Witness Spurious' in test_output:
-            result = PolywitTestResult.SPURIOUS
-        else:
-            result = PolywitTestResult.UNKNOWN
-        return result
+        out, err = self._run_command(self.run_cmd)
+        return self._parse_test_result(
+            out,
+            err,
+            'java.lang.AssertionError\n\tat MainKt.polywit_main',
+            'polywit: Witness Spurious'
+        )
