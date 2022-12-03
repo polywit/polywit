@@ -12,6 +12,7 @@ import argparse
 
 from polywit import __version__
 from polywit.java import JavaValidator
+from polywit.kotlin import KotlinValidator
 
 
 def dir_path(path):
@@ -45,6 +46,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
         dest='language',
         help='Frontend language'
     )
+
     java_sub_parser = subparsers.add_parser(
         'java',
         help='Use the java validator'
@@ -73,6 +75,34 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help='Path to the witness file. Must conform to the exchange format'
     )
 
+    kotlin_sub_parser = subparsers.add_parser(
+        'kotlin',
+        help='Use the kotlin validator'
+    )
+
+    kotlin_sub_parser.add_argument(
+        'benchmark',
+        type=dir_path,
+        help="Path to the benchmark directory"
+    )
+
+    kotlin_sub_parser.add_argument(
+        '--packages',
+        dest='package_paths',
+        type=dir_path,
+        nargs='*',
+        help="Path to the packages used by the benchmark"
+    )
+
+    kotlin_sub_parser.add_argument(
+        '--witness',
+        dest='witness_file',
+        required=True,
+        type=str,
+        action="store",
+        help='Path to the witness file. Must conform to the exchange format'
+    )
+
     return parser
 
 
@@ -82,8 +112,13 @@ def main():
     config = vars(config)
     try:
         print(f'polywit: v{__version__}')
-        validator = JavaValidator(config)
-
+        match config['language']:
+            case 'java':
+                validator = JavaValidator(config)
+            case 'kotlin':
+                validator = KotlinValidator(config)
+            case _:
+                raise ValueError("Validator not yet supported")
         validator.preprocess()
         assumptions = validator.extract_assumptions()
         outcome = validator.execute_test_harness(assumptions)
