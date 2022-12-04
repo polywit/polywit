@@ -3,9 +3,7 @@ on:
   pull_request:
     types: [opened, reopened]
 jobs:
-  assign:
+  add-reviews:
     runs-on: ubuntu-latest
     steps:
-      - uses: delivery-much/actions-assigner@v1
-        with:
-          reviewers: JossMoff
+      - uses: kentaro-m/auto-assign-action@v1.2.4
