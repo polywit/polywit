@@ -99,7 +99,7 @@ class WitnessProcessor(Processor):
             lambda nodes: nodes[1],
             self.witness.nodes.data('isViolationNode', default=False)
         ))
-        if len(entry_nodes) != 1:
+        if len(violation_nodes) != 1:
             raise ValueError('Witness does not have a single violation node')
         self.violation_node = violation_nodes[0][0]
         if len(list(nx.all_simple_paths(self.witness, source=self.entry_node, target=self.violation_node))) > 1:

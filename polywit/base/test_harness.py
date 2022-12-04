@@ -11,6 +11,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, Tuple
 
+from polywit.types import Assumption
+
 
 class PolywitTestResult(Enum):
     CORRECT = "Witness correct", "\033[92m"
@@ -105,7 +107,7 @@ class TestHarness(ABC):
         return out, err
 
     @abstractmethod
-    def build_test_harness(self, assumptions: List[str]) -> None:
+    def build_test_harness(self, assumptions: List[Assumption]) -> None:
         """
         Constructs and compiles the test harness
         """
@@ -119,8 +121,8 @@ class TestHarness(ABC):
         :return: The test result
         """
 
-    def _parse_test_result(self,
-                           test_output: str,
+    @staticmethod
+    def _parse_test_result(test_output: str,
                            test_error: str,
                            correct_output: str,
                            incorrect_output: str) -> PolywitTestResult:
