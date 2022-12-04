@@ -37,7 +37,7 @@ class JavaWitnessProcessor(WitnessProcessor):
         super().preprocess()
 
     @staticmethod
-    def _extract_value_from_assumption(assumption: Assumption, regex: str) -> str:
+    def _extract_value_from_assumption(assumption: str, regex: str) -> str:
         """
         Extracts an assumption value using a regex
 
