@@ -1,4 +1,4 @@
-networkx==2.8.8
-javalang==0.13.0
-kopyt==0.0.2
-flake8==5.0.4
+networkx~=2.8.8
+javalang~=0.13.0
+kopyt~=0.0.2
+setuptools==65.6.3

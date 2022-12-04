@@ -94,7 +94,7 @@ class KotlinFileProcessor(FileProcessor):
     def __init__(self, test_directory, benchmark_path, package_paths):
         super().__init__(test_directory)
         self.benchmark_path = benchmark_path
-        self.package_paths = package_paths
+        self.package_paths = package_paths if package_paths is not None else []
         self.source_files = list(glob.glob(self.benchmark_path + "/**/*.kt", recursive=True))
 
     def preprocess(self) -> None:
@@ -114,7 +114,7 @@ class KotlinFileProcessor(FileProcessor):
                     and node.name == 'main'):
                 node.name = 'polywit_main'
 
-        with open(f'{self.benchmark_path}/Main.kt', 'w', encoding='utf-8') as file:
+        with open(f'{self.test_directory}/Main.kt', 'w', encoding='utf-8') as file:
             file.write(str(result))
 
     def extract_position_type_map(self) -> dict[Position, str]:

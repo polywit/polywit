@@ -1,4 +1,4 @@
-package org.sosy_lab.sv_benchmarks
+package org.polywit.benchmarks
 
 import java.util.Queue
 import java.util.LinkedList
