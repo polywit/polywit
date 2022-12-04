@@ -77,7 +77,6 @@ class WitnessProcessor(Processor):
                 self.witness = nx.read_graphml(self.witness_path)
             except Exception as exc:
                 raise ValueError(f'Witness file is not formatted correctly. \n {exc}') from exc
-        self.specification = self._get_value_from_witness('specification')
         # Check witness type is a violation witness
         witness_type = self._get_value_from_witness('witness-type')
         if witness_type != 'violation_witness':
