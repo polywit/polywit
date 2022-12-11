@@ -70,7 +70,7 @@ class KotlinTestHarness(TestHarness):
 
     @property
     def run_cmd(self):
-        return ['java', '-jar', self.jar_path]
+        return ['java', '-ea', '-jar', self.jar_path]
 
     def build_test_harness(self, assumptions: List[Assumption]) -> None:
         """
