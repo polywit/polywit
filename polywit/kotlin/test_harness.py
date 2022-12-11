@@ -106,12 +106,13 @@ class KotlinTestHarness(TestHarness):
         # Map assumptions to string form, mapping None to null
         string_assumptions = [f'"{a}"' if a is not None else 'null' for a in assumption_values]
         verifier_data = self._read_data(self.VERIFIER_RESOURCE_PATH)
-        # Replace empty assumptions list with extracted assumptions
-        assumption_line = verifier_data.index('    var assumptionList = emptyArray<String>()\n')
-        verifier_data[assumption_line] = verifier_data[assumption_line].replace(
-            'emptyArray<String>()',
-            'arrayOf(' + ', '.join(string_assumptions) + ')'
-        )
+        # Replace empty assumptions list with extracted assumptions if they exist
+        if len(string_assumptions) > 0:
+            assumption_line = verifier_data.index('    var assumptionList = emptyArray<String>()\n')
+            verifier_data[assumption_line] = verifier_data[assumption_line].replace(
+                'emptyArray<String>()',
+                'arrayOf(' + ', '.join(string_assumptions) + ')'
+            )
         self._write_data(verifier_path, verifier_data)
 
     def _compile_test_harness(self) -> Tuple[str, str]:
@@ -133,6 +134,6 @@ class KotlinTestHarness(TestHarness):
         return self._parse_test_result(
             out,
             err,
-            'java.lang.AssertionError\n\tat MainKt.polywit_main',
+            'java.lang.AssertionError',
             'polywit: Witness Spurious'
         )
