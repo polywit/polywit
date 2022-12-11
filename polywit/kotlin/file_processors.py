@@ -150,10 +150,19 @@ def _filter_results(result, pattern):
 
 
 def _walk_tree(root):
-    children = None
+    children = []
     if isinstance(root, kotlin_node.FunctionDeclaration):
         yield (), root
-        children = root.body.sequence
+        if root.body is None or root.body.sequence is None:
+            children = []
+        else:
+            children = root.body.sequence
+    elif isinstance(root, kotlin_node.ClassDeclaration):
+        yield (), root
+        if root.body is None or root.body.members is None:
+            children = []
+        else:
+            children = root.body.members
     elif isinstance(root, kotlin_node.Statement):
         statement = root.statement
         yield (), statement
@@ -165,10 +174,13 @@ def _walk_tree(root):
     elif isinstance(root, kotlin_node.CatchBlock):
         yield (), root
         children = root.block.sequence
+    elif isinstance(root, kotlin_node.PropertyDeclaration):
+        yield (), root
+        children = []
     else:
         children = root
 
     for child in children:
-        if isinstance(child, (kotlin_node.Node, list, tuple)):
+        if isinstance(child, kotlin_node.Node):
             for path, node in _walk_tree(child):
                 yield (root,) + path, node
