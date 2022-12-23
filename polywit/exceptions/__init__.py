@@ -1,0 +1,1 @@
+from polywit.exceptions.exceptions import PolywitException
