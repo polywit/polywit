@@ -77,7 +77,6 @@ class WitnessProcessor(Processor):
                 self.witness = nx.read_graphml(self.witness_path)
             except Exception as exc:
                 raise ValueError(f'Witness file is not formatted correctly. \n {exc}') from exc
-        self.specification = self._get_value_from_witness('specification')
         # Check witness type is a violation witness
         witness_type = self._get_value_from_witness('witness-type')
         if witness_type != 'violation_witness':
@@ -100,7 +99,7 @@ class WitnessProcessor(Processor):
             lambda nodes: nodes[1],
             self.witness.nodes.data('isViolationNode', default=False)
         ))
-        if len(entry_nodes) != 1:
+        if len(violation_nodes) != 1:
             raise ValueError('Witness does not have a single violation node')
         self.violation_node = violation_nodes[0][0]
         if len(list(nx.all_simple_paths(self.witness, source=self.entry_node, target=self.violation_node))) > 1:
