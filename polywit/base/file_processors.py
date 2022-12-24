@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 import os
 import networkx as nx
 
-from polywit.types.aliases import Position
+from polywit._typing.aliases import Position
 
 
 class Processor(ABC):

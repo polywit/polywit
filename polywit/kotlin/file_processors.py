@@ -13,7 +13,7 @@ from typing import List
 from kopyt import node as kotlin_node, Parser
 
 from polywit.base import FileProcessor, WitnessProcessor
-from polywit.types.aliases import Assumption, Position
+from polywit._typing.aliases import Assumption, Position
 
 
 class KotlinWitnessProcessor(WitnessProcessor):

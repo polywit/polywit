@@ -1,6 +1,6 @@
 from typing import List
 
-from polywit.types import Assumption, Position
+from polywit._typing import Assumption, Position
 
 
 def filter_assumptions(position_type_map: dict[Position, str], assumptions: List[Assumption]) -> List[Assumption]:

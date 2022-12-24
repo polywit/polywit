@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, Tuple
 
-from polywit.types import Assumption
+from polywit._typing import Assumption
 
 
 class PolywitTestResult(Enum):

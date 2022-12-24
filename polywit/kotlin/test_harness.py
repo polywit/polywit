@@ -9,7 +9,7 @@ import os
 from typing import Tuple, List
 
 from polywit.base import TestHarness, PolywitTestResult
-from polywit.types import Assumption
+from polywit._typing import Assumption
 
 
 class KotlinTestHarness(TestHarness):
