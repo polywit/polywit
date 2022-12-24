@@ -1,8 +1,8 @@
-from polywit.exceptions.exceptions import ValidationException, WitnessProcessorException, FileProcessorException, TestHarnessException
+from polywit.exceptions.exceptions import ValidationError, WitnessProcessorError, FileProcessorError, TestHarnessError
 
 __all__ = [
-    'ValidationException',
-    'WitnessProcessorException',
-    'FileProcessorException',
-    'TestHarnessException'
+    'ValidationError',
+    'WitnessProcessorError',
+    'FileProcessorError',
+    'TestHarnessError'
 ]

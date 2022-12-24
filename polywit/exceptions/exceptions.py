@@ -1,14 +1,18 @@
-class ValidationException(Exception):
+class ValidationError(Exception):
     pass
 
 
-class WitnessProcessorException(ValidationException):
+class WitnessProcessorError(ValidationError):
     pass
 
 
-class FileProcessorException(ValidationException):
+class WitnessFormatError(WitnessProcessorError):
     pass
 
 
-class TestHarnessException(ValidationException):
+class FileProcessorError(ValidationError):
+    pass
+
+
+class TestHarnessError(ValidationError):
     pass
