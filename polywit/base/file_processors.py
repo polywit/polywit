@@ -7,9 +7,11 @@
 
 from abc import ABC, abstractmethod
 import os
+from typing import List, Optional
+
 import networkx as nx
 
-from polywit._typing.aliases import Position
+from polywit._typing.aliases import Position, Assumption
 
 
 class Processor(ABC):
@@ -71,7 +73,7 @@ class WitnessProcessor(Processor):
         self.witness_path = witness_path
         self.witness = None
 
-    def preprocess(self):
+    def preprocess(self) -> None:
         if self.witness is None:
             try:
                 self.witness = nx.read_graphml(self.witness_path)
@@ -80,7 +82,7 @@ class WitnessProcessor(Processor):
         # Check witness is linear
         self._check_witness_linearity()
 
-    def _check_witness_linearity(self):
+    def _check_witness_linearity(self) -> None:
         """
         Checks the witness is a linear violation witness before building validator
         """
@@ -103,11 +105,11 @@ class WitnessProcessor(Processor):
         if len(list(nx.all_simple_paths(self.witness, source=self.entry_node, target=self.violation_node))) > 1:
             raise ValueError('Witness has multiple execution paths from source to sink')
 
-    def _get_value_from_witness(self, key):
+    def _get_value_from_witness(self, key) -> Optional[str]:
         return self.witness.graph[key] if key in self.witness.graph else None
 
     @abstractmethod
-    def extract_assumptions(self):
+    def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
         """
