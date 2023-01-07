@@ -47,9 +47,19 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help='Frontend language'
     )
 
+    base_subparser = argparse.ArgumentParser(add_help=False)
+
+    # define common shared arguments
+    base_subparser.add_argument(
+        '--show-assumptions',
+        action='store_true',
+        help="Shows the extracted assumptions from the witness"
+    )
+
     java_sub_parser = subparsers.add_parser(
         'java',
-        help='Use the java validator'
+        help='Use the java validator',
+        parents=[base_subparser]
     )
 
     java_sub_parser.add_argument(
@@ -77,7 +87,8 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
     kotlin_sub_parser = subparsers.add_parser(
         'kotlin',
-        help='Use the kotlin validator'
+        help='Use the kotlin validator',
+        parents=[base_subparser]
     )
 
     kotlin_sub_parser.add_argument(
