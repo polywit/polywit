@@ -70,7 +70,8 @@ class Validator(ABC):
         self.test_harness.build_test_harness(assumptions)
         return self.test_harness.run_test_harness()
 
-    def _print_assumptions(self, assumptions: List[Assumption], position_type_map: dict[Position, str]):
+    @staticmethod
+    def _print_assumptions(assumptions: List[Assumption], position_type_map: dict[Position, str]):
         headers = ['Position', 'Value', 'Type']
         table_data = []
         for assumption in assumptions:
