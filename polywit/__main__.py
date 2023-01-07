@@ -52,7 +52,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
     # define common shared arguments
     base_subparser.add_argument(
         '--show-assumptions',
-        action=argparse.BooleanOptionalAction,
+        action='store_true',
         help="Shows the extracted assumptions from the witness"
     )
 
