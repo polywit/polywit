@@ -82,7 +82,7 @@ class WitnessProcessor(Processor):
 
     def _check_witness_linearity(self):
         """
-        Checks the witness is linear before building validator
+        Checks the witness is a linear violation witness before building validator
         """
         entry_nodes = list(filter(
             lambda nodes: nodes[1],
