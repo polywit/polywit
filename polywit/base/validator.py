@@ -4,7 +4,6 @@
 
  This module deals with the base building of the test harness
 """
-import shutil
 import tempfile
 from abc import ABC, abstractmethod
 from typing import List
