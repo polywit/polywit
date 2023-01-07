@@ -14,7 +14,7 @@ import networkx as nx
 import javalang
 
 from polywit.base import FileProcessor, WitnessProcessor
-from polywit.types.aliases import Assumption, Position
+from polywit._typing.aliases import Assumption, Position
 
 
 class JavaWitnessProcessor(WitnessProcessor):

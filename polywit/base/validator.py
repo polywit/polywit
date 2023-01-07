@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from polywit.base import WitnessProcessor, FileProcessor
-from polywit.types import Assumption
+from polywit._typing import Assumption
 from polywit.utils import filter_assumptions
 from polywit.base import TestHarness, PolywitTestResult
 
