@@ -88,7 +88,12 @@ class Validator(ABC):
         return assumptions
 
     def execute_test_harness(self, assumptions: List[Assumption]) -> PolywitTestResult:
+        """
+        Builds and executes a test harness using the extracted assumptions
 
+        :param assumptions: List of extracted assumptions from witness
+        :return: The validation result from the executed test harness
+        """
         self.spinner.start(self.BUILD_TEST_HARNESS_MESSAGE)
         self.test_harness.build_test_harness(assumptions)
         self.spinner.succeed()
@@ -100,7 +105,13 @@ class Validator(ABC):
         return result
 
     @staticmethod
-    def _print_assumptions(assumptions: List[Assumption], position_type_map: dict[Position, str]):
+    def _print_assumptions(assumptions: List[Assumption], position_type_map: dict[Position, str]) -> None:
+        """
+        Outputs a table of assumptions and their associated types
+
+        :param assumptions: List of extracted assumptions from witness
+        :param position_type_map: Position type map from the benchmark files
+        """
         headers = ['Position', 'Value', 'Type']
         table_data = []
         for assumption in assumptions:
