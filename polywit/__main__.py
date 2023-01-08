@@ -133,9 +133,10 @@ def main():
         validator.preprocess()
         assumptions = validator.extract_assumptions()
         outcome = validator.execute_test_harness(assumptions)
-        print(f'polywit: {outcome}')
+        print(f'{outcome}')
 
     except BaseException as err:
+        validator.spinner.fail()
         print(f'polywit: Could not validate witness \n{err}')
     sys.exit()
 
