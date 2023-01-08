@@ -6,9 +6,11 @@
 """
 import tempfile
 from abc import ABC, abstractmethod
+from textwrap import indent
 from typing import List
 
 from tabulate import tabulate
+from halo import Halo
 
 from polywit.base import WitnessProcessor, FileProcessor
 from polywit._typing import Assumption, Position
@@ -22,6 +24,13 @@ class Validator(ABC):
     constructing, executing the test harness and reporting the result
     """
 
+    PREPROCESS_BENCHMARK_MESSAGE = 'Preprocessing benchmark files'
+    PREPROCESS_WITNESS_MESSAGE = 'Preprocessing witness file'
+    EXTRACT_POS_TYPE_MAP_MESSAGE = 'Extracting position type map from benchmarks'
+    EXTRACT_ASSUMPTIONS_MESSAGE = 'Extracting assumptions from witness'
+    BUILD_TEST_HARNESS_MESSAGE = 'Building test harness'
+    RUN_TEST_HARNESS_MESSAGE = 'Executing test harness'
+
     def __init__(self, config, directory=None):
         """
         The constructor of Validator collects information of output directory is specified
@@ -29,6 +38,7 @@ class Validator(ABC):
         """
         self.directory = tempfile.mkdtemp() if directory is None else directory
         self.config = config
+        self.spinner = Halo(text='', spinner='dots')
 
     @property
     @abstractmethod
@@ -49,8 +59,13 @@ class Validator(ABC):
         """
         Run the preprocessing steps for the processors
         """
+        self.spinner.start(self.PREPROCESS_BENCHMARK_MESSAGE)
         self.file_processor.preprocess()
+        self.spinner.succeed()
+
+        self.spinner.start(self.PREPROCESS_WITNESS_MESSAGE)
         self.witness_processor.preprocess()
+        self.spinner.succeed()
 
     def extract_assumptions(self) -> List[Assumption]:
         """
@@ -58,19 +73,45 @@ class Validator(ABC):
 
         :return: List of assumptions
         """
+
+        self.spinner.start(self.EXTRACT_POS_TYPE_MAP_MESSAGE)
         position_type_map = self.file_processor.extract_position_type_map()
+        self.spinner.succeed()
+
+        self.spinner.start(self.EXTRACT_ASSUMPTIONS_MESSAGE)
         assumptions = self.witness_processor.extract_assumptions()
+        self.spinner.succeed()
+
         assumptions = filter_assumptions(position_type_map, assumptions)
         if self.config['show_assumptions']:
             self._print_assumptions(assumptions, position_type_map)
         return assumptions
 
     def execute_test_harness(self, assumptions: List[Assumption]) -> PolywitTestResult:
+        """
+        Builds and executes a test harness using the extracted assumptions
+
+        :param assumptions: List of extracted assumptions from witness
+        :return: The validation result from the executed test harness
+        """
+        self.spinner.start(self.BUILD_TEST_HARNESS_MESSAGE)
         self.test_harness.build_test_harness(assumptions)
-        return self.test_harness.run_test_harness()
+        self.spinner.succeed()
+
+        self.spinner.start(self.RUN_TEST_HARNESS_MESSAGE)
+        result = self.test_harness.run_test_harness()
+        self.spinner.succeed()
+
+        return result
 
     @staticmethod
-    def _print_assumptions(assumptions: List[Assumption], position_type_map: dict[Position, str]):
+    def _print_assumptions(assumptions: List[Assumption], position_type_map: dict[Position, str]) -> None:
+        """
+        Outputs a table of assumptions and their associated types
+
+        :param assumptions: List of extracted assumptions from witness
+        :param position_type_map: Position type map from the benchmark files
+        """
         headers = ['Position', 'Value', 'Type']
         table_data = []
         for assumption in assumptions:
@@ -79,6 +120,5 @@ class Validator(ABC):
             value = assumption[1]
             value_type = position_type_map[position]
             table_data.append((formatted_position, value, value_type))
-        print('polywit: Extracted assumptions:')
-        print(tabulate(table_data, headers=headers, tablefmt="pretty"))
-
+        # Create table and indent by 2 spaces to look nice
+        print(indent(tabulate(table_data, headers=headers, tablefmt="pretty"), '  '))
