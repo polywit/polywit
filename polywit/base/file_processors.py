@@ -7,9 +7,11 @@
 
 from abc import ABC, abstractmethod
 import os
+from typing import List, Optional
+
 import networkx as nx
 
-from polywit._typing.aliases import Position
+from polywit._typing.aliases import Position, Assumption
 
 
 class Processor(ABC):
@@ -71,22 +73,18 @@ class WitnessProcessor(Processor):
         self.witness_path = witness_path
         self.witness = None
 
-    def preprocess(self):
+    def preprocess(self) -> None:
         if self.witness is None:
             try:
                 self.witness = nx.read_graphml(self.witness_path)
             except Exception as exc:
                 raise ValueError(f'Witness file is not formatted correctly. \n {exc}') from exc
-        # Check witness type is a violation witness
-        witness_type = self._get_value_from_witness('witness-type')
-        if witness_type != 'violation_witness':
-            raise ValueError(f'No support for {witness_type}')
         # Check witness is linear
         self._check_witness_linearity()
 
-    def _check_witness_linearity(self):
+    def _check_witness_linearity(self) -> None:
         """
-        Checks the witness is linear before building validator
+        Checks the witness is a linear violation witness before building validator
         """
         entry_nodes = list(filter(
             lambda nodes: nodes[1],
@@ -99,17 +97,19 @@ class WitnessProcessor(Processor):
             lambda nodes: nodes[1],
             self.witness.nodes.data('isViolationNode', default=False)
         ))
-        if len(violation_nodes) != 1:
+        if len(violation_nodes) == 0:
+            raise ValueError('No support for non violation-witnesses')
+        elif len(violation_nodes) > 1:
             raise ValueError('Witness does not have a single violation node')
         self.violation_node = violation_nodes[0][0]
         if len(list(nx.all_simple_paths(self.witness, source=self.entry_node, target=self.violation_node))) > 1:
             raise ValueError('Witness has multiple execution paths from source to sink')
 
-    def _get_value_from_witness(self, key):
+    def _get_value_from_witness(self, key) -> Optional[str]:
         return self.witness.graph[key] if key in self.witness.graph else None
 
     @abstractmethod
-    def extract_assumptions(self):
+    def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
         """
