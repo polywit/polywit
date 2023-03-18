@@ -7,18 +7,14 @@
 
 import os
 import sys
-
 import argparse
 import tempfile
 
-from polywit.base.validator import Validator
-
-from polywit.java.test_harness import JavaTestHarness
-
-from polywit.java.file_processors import JavaFileProcessor, JavaWitnessProcessor
+from polywit.base import Validator
+from polywit.java import JavaTestHarness, JavaFileProcessor, JavaWitnessProcessor
+from polywit.kotlin import KotlinTestHarness, KotlinWitnessProcessor, KotlinFileProcessor
 
 from polywit import __version__
-from polywit.kotlin import KotlinValidator
 
 
 def dir_path(path):
@@ -151,7 +147,17 @@ def main():
                 test_harness = JavaTestHarness(config['directory'])
                 validator = Validator(file_processor, witness_processor, test_harness, config)
             case 'kotlin':
-                validator = KotlinValidator(config)
+                file_processor = KotlinFileProcessor(
+                    config['directory'],
+                    config['benchmark'],
+                    config['package_paths']
+                )
+                witness_processor = KotlinWitnessProcessor(
+                    config['directory'],
+                    config['witness_file']
+                )
+                test_harness = KotlinTestHarness(config['directory'])
+                validator = Validator(file_processor, witness_processor, test_harness, config)
             case _:
                 raise ValueError("Validator not yet supported")
         validator.preprocess()
