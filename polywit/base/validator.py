@@ -10,7 +10,6 @@ from typing import List
 from tabulate import tabulate
 from halo import Halo
 
-from polywit.exceptions import ValidationError
 from polywit.base import WitnessProcessor, FileProcessor
 from polywit._typing import Assumption, Position
 from polywit.utils import filter_assumptions

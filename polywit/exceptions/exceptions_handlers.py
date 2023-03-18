@@ -1,5 +1,3 @@
-import traceback
-
 from polywit.exceptions.exceptions import ValidationError
 
 
