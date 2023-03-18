@@ -4,14 +4,13 @@
 
  This module deals with the base building of the test harness
 """
-import tempfile
-from abc import ABC, abstractmethod
 from textwrap import indent
 from typing import List
 
 from tabulate import tabulate
 from halo import Halo
 
+from polywit.exceptions import ValidationError
 from polywit.base import WitnessProcessor, FileProcessor
 from polywit._typing import Assumption, Position
 from polywit.utils import filter_assumptions
@@ -58,13 +57,17 @@ class Validator:
         """
         Run the preprocessing steps for the processors
         """
-        self.spinner.start(self.PREPROCESS_BENCHMARK_MESSAGE)
-        self.file_processor.preprocess()
-        self.spinner.succeed()
+        try:
+            self.spinner.start(self.PREPROCESS_BENCHMARK_MESSAGE)
+            self.file_processor.preprocess()
+            self.spinner.succeed()
 
-        self.spinner.start(self.PREPROCESS_WITNESS_MESSAGE)
-        self.witness_processor.preprocess()
-        self.spinner.succeed()
+            self.spinner.start(self.PREPROCESS_WITNESS_MESSAGE)
+            self.witness_processor.preprocess()
+            self.spinner.succeed()
+        except ValidationError:
+            self.spinner.fail()
+            raise
 
     def extract_assumptions(self) -> List[Assumption]:
         """

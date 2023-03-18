@@ -9,13 +9,15 @@ import os
 import sys
 
 import argparse
+import tempfile
+
+from polywit.base.validator import Validator
 
 from polywit.java.test_harness import JavaTestHarness
 
 from polywit.java.file_processors import JavaFileProcessor, JavaWitnessProcessor
 
 from polywit import __version__
-from polywit.java import JavaValidator
 from polywit.kotlin import KotlinValidator
 
 
@@ -62,7 +64,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
     base_subparser.add_argument(
         '--directory',
-        action='store_true',
+        default=tempfile.mkdtemp(),
         help='Directory that the test harness will be written to'
     )
 
@@ -147,7 +149,7 @@ def main():
                     config['witness_file']
                 )
                 test_harness = JavaTestHarness(config['directory'])
-                validator = JavaValidator(config)
+                validator = Validator(file_processor, witness_processor, test_harness, config)
             case 'kotlin':
                 validator = KotlinValidator(config)
             case _:
