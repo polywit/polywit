@@ -57,17 +57,13 @@ class Validator:
         """
         Run the preprocessing steps for the processors
         """
-        try:
-            self.spinner.start(self.PREPROCESS_BENCHMARK_MESSAGE)
-            self.file_processor.preprocess()
-            self.spinner.succeed()
+        self.spinner.start(self.PREPROCESS_BENCHMARK_MESSAGE)
+        self.file_processor.preprocess()
+        self.spinner.succeed()
 
-            self.spinner.start(self.PREPROCESS_WITNESS_MESSAGE)
-            self.witness_processor.preprocess()
-            self.spinner.succeed()
-        except ValidationError:
-            self.spinner.fail()
-            raise
+        self.spinner.start(self.PREPROCESS_WITNESS_MESSAGE)
+        self.witness_processor.preprocess()
+        self.spinner.succeed()
 
     def extract_assumptions(self) -> List[Assumption]:
         """
@@ -75,23 +71,18 @@ class Validator:
 
         :return: List of assumptions
         """
-        try:
-            self.spinner.start(self.EXTRACT_POS_TYPE_MAP_MESSAGE)
-            position_type_map = self.file_processor.extract_position_type_map()
-            self.spinner.succeed()
+        self.spinner.start(self.EXTRACT_POS_TYPE_MAP_MESSAGE)
+        position_type_map = self.file_processor.extract_position_type_map()
+        self.spinner.succeed()
 
-            self.spinner.start(self.EXTRACT_ASSUMPTIONS_MESSAGE)
-            assumptions = self.witness_processor.extract_assumptions()
-            self.spinner.succeed()
+        self.spinner.start(self.EXTRACT_ASSUMPTIONS_MESSAGE)
+        assumptions = self.witness_processor.extract_assumptions()
+        self.spinner.succeed()
 
-            assumptions = filter_assumptions(position_type_map, assumptions)
-            if self.config['show_assumptions']:
-                self._print_assumptions(assumptions, position_type_map)
-        except ValidationError:
-            self.spinner.fail()
-            raise
-        else:
-            return assumptions
+        assumptions = filter_assumptions(position_type_map, assumptions)
+        if self.config['show_assumptions']:
+            self._print_assumptions(assumptions, position_type_map)
+        return assumptions
 
     def execute_test_harness(self, assumptions: List[Assumption]) -> PolywitTestResult:
         """
@@ -100,19 +91,14 @@ class Validator:
         :param assumptions: List of extracted assumptions from witness
         :return: The validation result from the executed test harness
         """
-        try:
-            self.spinner.start(self.BUILD_TEST_HARNESS_MESSAGE)
-            self.test_harness.build_test_harness(assumptions)
-            self.spinner.succeed()
+        self.spinner.start(self.BUILD_TEST_HARNESS_MESSAGE)
+        self.test_harness.build_test_harness(assumptions)
+        self.spinner.succeed()
 
-            self.spinner.start(self.RUN_TEST_HARNESS_MESSAGE)
-            result = self.test_harness.run_test_harness()
-            self.spinner.succeed()
-        except ValidationError:
-            self.spinner.fail()
-            raise
-        else:
-            return result
+        self.spinner.start(self.RUN_TEST_HARNESS_MESSAGE)
+        result = self.test_harness.run_test_harness()
+        self.spinner.succeed()
+        return result
 
     @staticmethod
     def _print_assumptions(assumptions: List[Assumption], position_type_map: dict[Position, str]) -> None:
