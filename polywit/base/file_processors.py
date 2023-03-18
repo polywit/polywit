@@ -11,7 +11,7 @@ from typing import List, Optional
 
 import networkx as nx
 
-from polywit._typing.aliases import Position, Assumption
+from polywit._typing import Position, Assumption
 
 
 class Processor(ABC):

@@ -4,8 +4,6 @@
 
  This module deals with the base building of the test harness
 """
-import tempfile
-from abc import ABC, abstractmethod
 from textwrap import indent
 from typing import List
 
@@ -18,7 +16,7 @@ from polywit.utils import filter_assumptions
 from polywit.base import TestHarness, PolywitTestResult
 
 
-class Validator(ABC):
+class Validator:
     """
     The class Validator gives functionality for processing the input files,
     constructing, executing the test harness and reporting the result
@@ -31,29 +29,28 @@ class Validator(ABC):
     BUILD_TEST_HARNESS_MESSAGE = 'Building test harness'
     RUN_TEST_HARNESS_MESSAGE = 'Executing test harness'
 
-    def __init__(self, config, directory=None):
+    def __init__(self, _file_processor, _witness_processor, _test_harness, config):
         """
         The constructor of Validator collects information of output directory is specified
         :param directory: Directory that the test harness will be written to.
         """
-        self.directory = tempfile.mkdtemp() if directory is None else directory
+        self._file_processor = _file_processor
+        self._witness_processor = _witness_processor
+        self._test_harness = _test_harness
         self.config = config
         self.spinner = Halo(text='', spinner='dots')
 
     @property
-    @abstractmethod
     def file_processor(self) -> FileProcessor:
-        pass
+        return self._file_processor
 
     @property
-    @abstractmethod
     def witness_processor(self) -> WitnessProcessor:
-        pass
+        return self._witness_processor
 
     @property
-    @abstractmethod
     def test_harness(self) -> TestHarness:
-        pass
+        return self._test_harness
 
     def preprocess(self) -> None:
         """
@@ -73,7 +70,6 @@ class Validator(ABC):
 
         :return: List of assumptions
         """
-
         self.spinner.start(self.EXTRACT_POS_TYPE_MAP_MESSAGE)
         position_type_map = self.file_processor.extract_position_type_map()
         self.spinner.succeed()
@@ -101,7 +97,6 @@ class Validator(ABC):
         self.spinner.start(self.RUN_TEST_HARNESS_MESSAGE)
         result = self.test_harness.run_test_harness()
         self.spinner.succeed()
-
         return result
 
     @staticmethod

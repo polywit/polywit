@@ -13,8 +13,10 @@ from typing import List
 import networkx as nx
 import javalang
 
+from polywit.exceptions import validation_error_handler, PositionTypeExtractionError, FilePreprocessingError, \
+    AssumptionExtractionError, WitnessPreprocessingError
 from polywit.base import FileProcessor, WitnessProcessor
-from polywit._typing.aliases import Assumption, Position
+from polywit._typing import Assumption, Position
 
 
 class JavaWitnessProcessor(WitnessProcessor):
@@ -25,6 +27,7 @@ class JavaWitnessProcessor(WitnessProcessor):
     def __init__(self, test_directory, witness_path):
         super().__init__(test_directory, witness_path)
 
+    @validation_error_handler(WitnessPreprocessingError)
     def preprocess(self) -> None:
         """
         Preprocess the witness to avoid any unformatted XML
@@ -53,7 +56,7 @@ class JavaWitnessProcessor(WitnessProcessor):
         else:
             # Check to see if it is because nondet comes from a function return
             # and in which case it is not assigned to a variable so remove = match from regex
-            regex = regex[2:]
+            regex = regex[1:]
             search_result = re.search(regex, assumption)
             if search_result is not None:
                 matches = [sr for sr in search_result.groups() if sr is not None]
@@ -69,6 +72,7 @@ class JavaWitnessProcessor(WitnessProcessor):
             assumption_value = 'NaN'
         return str(assumption_value)
 
+    @validation_error_handler(AssumptionExtractionError)
     def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
@@ -77,10 +81,10 @@ class JavaWitnessProcessor(WitnessProcessor):
         assumptions = []
         # GDart uses different syntax for numeric types
         if self.producer == 'GDart':
-            regex = r"= (-?\d*\.?\d+|false|true)|\w+\.equals\(\"(.*)\"\)|\w+\.parseDouble\(\"(" \
+            regex = r"=\s?(-?\d*\.?\d+|false|true)|\w+\.equals\(\"(.*)\"\)|\w+\.parseDouble\(\"(" \
                     r".*)\"\)|\w+\.parseFloat\(\"(.*)\"\)"
         else:
-            regex = r"= ((\S+)|(-?\d*\.?\d+[L]?)|(false|true|null))"
+            regex = r"=\s?(\S+)|\w+\.equals\(\"(.*)\"\)|(-?\d*\.?\d+[L]?)|(false|true|null)"
         for assumption_edge in filter(
                 lambda edge: ('assumption.scope' in edge[2]),
                 self.witness.edges(data=True)
@@ -89,8 +93,6 @@ class JavaWitnessProcessor(WitnessProcessor):
             file_name = self._get_file_name_from_path(data['originFileName'])
             line_number = data['startline']
             scope = data['assumption.scope']
-            if file_name not in scope:
-                continue
             assumption_value = self._extract_value_from_assumption(data['assumption'], regex)
             if assumption_value is not None:
                 if self.producer != 'GDart' and assumption_value == 'null':
@@ -107,21 +109,22 @@ class JavaFileProcessor(FileProcessor):
     def __init__(self, test_directory, benchmark_path, package_paths):
         super().__init__(test_directory)
         self.benchmark_path = benchmark_path
-        self.package_paths = package_paths
+        self.package_paths = package_paths if package_paths is not None else []
         self.source_files = list(glob.glob(self.benchmark_path + "/**/*.java", recursive=True))
 
+    @validation_error_handler(FilePreprocessingError)
     def preprocess(self) -> None:
         copy_tree(self.benchmark_path, self.test_directory)
         for package in self.package_paths:
             copy_tree(package, self.test_directory)
 
     def _check_valid_import(self, import_line: str) -> List[str]:
-        check_file = import_line.strip()\
-            .replace(".", "/")\
-            .replace(";", "")\
-            .replace("import", "")\
+        check_file = import_line.strip() \
+            .replace(".", "/") \
+            .replace(";", "") \
+            .replace("import", "") \
             .replace(' ', '')
-        if not check_file.startswith('java'):
+        if not check_file.startswith('java') and check_file != 'org/sosy_lab/sv_benchmarks/Verifier':
             # Check in working directory
             files_exists = [source_f.endswith("{0}.java".format(check_file)) for source_f in self.source_files]
             if sum(files_exists) > 1:
@@ -152,6 +155,7 @@ class JavaFileProcessor(FileProcessor):
                 return [full_paths[files_exists.index(True)]]
         return []
 
+    @validation_error_handler(PositionTypeExtractionError)
     def extract_position_type_map(self) -> dict[Position, str]:
         position_type_map: dict[Position, str] = {}
         nondet_functions_map: dict[str, Position] = {}

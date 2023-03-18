@@ -7,12 +7,16 @@
 
 import os
 import sys
-
 import argparse
+import tempfile
+import traceback
+
+from polywit.exceptions import ValidationError
+from polywit.base import Validator
+from polywit.java import JavaTestHarness, JavaFileProcessor, JavaWitnessProcessor
+from polywit.kotlin import KotlinTestHarness, KotlinWitnessProcessor, KotlinFileProcessor
 
 from polywit import __version__
-from polywit.java import JavaValidator
-from polywit.kotlin import KotlinValidator
 
 
 def dir_path(path):
@@ -56,6 +60,17 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="Shows the extracted assumptions from the witness"
     )
 
+    base_subparser.add_argument(
+        '--directory',
+        default=tempfile.mkdtemp(),
+        help='Directory that the test harness will be written to'
+    )
+    base_subparser.add_argument(
+        '--stacktrace',
+        action='store_true',
+        help="Shows the stacktrace of the failed execution"
+    )
+
     java_sub_parser = subparsers.add_parser(
         'java',
         help='Use the java validator',
@@ -70,6 +85,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
     java_sub_parser.add_argument(
         '--packages',
+        default=[],
         dest='package_paths',
         type=dir_path,
         nargs='*',
@@ -99,6 +115,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
     kotlin_sub_parser.add_argument(
         '--packages',
+        default=[],
         dest='package_paths',
         type=dir_path,
         nargs='*',
@@ -121,13 +138,34 @@ def main():
     parser = create_argument_parser()
     config = parser.parse_args(sys.argv[1:])
     config = vars(config)
+
     try:
         print(f'polywit: v{__version__}')
         match config['language']:
             case 'java':
-                validator = JavaValidator(config)
+                file_processor = JavaFileProcessor(
+                    config['directory'],
+                    config['benchmark'],
+                    config['package_paths']
+                )
+                witness_processor = JavaWitnessProcessor(
+                    config['directory'],
+                    config['witness_file']
+                )
+                test_harness = JavaTestHarness(config['directory'])
+                validator = Validator(file_processor, witness_processor, test_harness, config)
             case 'kotlin':
-                validator = KotlinValidator(config)
+                file_processor = KotlinFileProcessor(
+                    config['directory'],
+                    config['benchmark'],
+                    config['package_paths']
+                )
+                witness_processor = KotlinWitnessProcessor(
+                    config['directory'],
+                    config['witness_file']
+                )
+                test_harness = KotlinTestHarness(config['directory'])
+                validator = Validator(file_processor, witness_processor, test_harness, config)
             case _:
                 raise ValueError("Validator not yet supported")
         validator.preprocess()
@@ -135,9 +173,13 @@ def main():
         outcome = validator.execute_test_harness(assumptions)
         print(f'{outcome}')
 
-    except BaseException as err:
+    except ValidationError as err:
         validator.spinner.fail()
-        print(f'polywit: Could not validate witness \n{err}')
+        if not config['stacktrace']:
+            print(f'\033[91m{err.message}\033[0m')
+            print(f'\033[91m{err.retry_message}\033[0m')
+        else:
+            traceback.print_exc()
     sys.exit()
 
 

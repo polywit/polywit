@@ -12,8 +12,10 @@ from typing import List
 
 from kopyt import node as kotlin_node, Parser
 
+from polywit.exceptions import FilePreprocessingError, PositionTypeExtractionError, WitnessPreprocessingError, \
+    AssumptionExtractionError, validation_error_handler
 from polywit.base import FileProcessor, WitnessProcessor
-from polywit._typing.aliases import Assumption, Position
+from polywit._typing import Assumption, Position
 
 
 class KotlinWitnessProcessor(WitnessProcessor):
@@ -24,6 +26,7 @@ class KotlinWitnessProcessor(WitnessProcessor):
     def __init__(self, test_directory, witness_path):
         super().__init__(test_directory, witness_path)
 
+    @validation_error_handler(WitnessPreprocessingError)
     def preprocess(self) -> None:
         """
         Preprocess the witness to avoid any unformatted XML
@@ -63,6 +66,7 @@ class KotlinWitnessProcessor(WitnessProcessor):
             assumption_value = 'NaN'
         return str(assumption_value)
 
+    @validation_error_handler(AssumptionExtractionError)
     def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
@@ -94,9 +98,10 @@ class KotlinFileProcessor(FileProcessor):
     def __init__(self, test_directory, benchmark_path, package_paths):
         super().__init__(test_directory)
         self.benchmark_path = benchmark_path
-        self.package_paths = package_paths if package_paths is not None else []
+        self.package_paths = package_paths
         self.source_files = list(glob.glob(self.benchmark_path + "/**/*.kt", recursive=True))
 
+    @validation_error_handler(FilePreprocessingError)
     def preprocess(self) -> None:
         copy_tree(self.benchmark_path, self.test_directory)
         for package in self.package_paths:
@@ -117,6 +122,7 @@ class KotlinFileProcessor(FileProcessor):
         with open(f'{self.test_directory}/Main.kt', 'w', encoding='utf-8') as file:
             file.write(str(result))
 
+    @validation_error_handler(PositionTypeExtractionError)
     def extract_position_type_map(self) -> dict[Position, str]:
         """
         Extracts the position type map for the input files
