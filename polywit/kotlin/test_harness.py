@@ -8,6 +8,7 @@
 import os
 from typing import Tuple, List
 
+from polywit.exceptions import TestHarnessExecutionError, validation_error_handler, TestHarnessConstructionError
 from polywit.base import TestHarness, PolywitTestResult
 from polywit._typing import Assumption
 
@@ -72,6 +73,7 @@ class KotlinTestHarness(TestHarness):
     def run_cmd(self):
         return ['java', '-ea', '-jar', self.jar_path]
 
+    @validation_error_handler(TestHarnessConstructionError)
     def build_test_harness(self, assumptions: List[Assumption]) -> None:
         """
         Constructs and compiles the test harness consisting of
@@ -124,6 +126,7 @@ class KotlinTestHarness(TestHarness):
         out, err = self._run_command(self.compile_cmd)
         return out, err
 
+    @validation_error_handler(TestHarnessExecutionError)
     def run_test_harness(self) -> PolywitTestResult:
         """
         Runs the test harness and reports the outcome of the test execution

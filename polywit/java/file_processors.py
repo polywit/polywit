@@ -13,8 +13,10 @@ from typing import List
 import networkx as nx
 import javalang
 
+from polywit.exceptions import validation_error_handler, PositionTypeExtractionError, FilePreprocessingError, \
+    AssumptionExtractionError, WitnessPreprocessingError
 from polywit.base import FileProcessor, WitnessProcessor
-from polywit._typing.aliases import Assumption, Position
+from polywit._typing import Assumption, Position
 
 
 class JavaWitnessProcessor(WitnessProcessor):
@@ -25,6 +27,7 @@ class JavaWitnessProcessor(WitnessProcessor):
     def __init__(self, test_directory, witness_path):
         super().__init__(test_directory, witness_path)
 
+    @validation_error_handler(WitnessPreprocessingError)
     def preprocess(self) -> None:
         """
         Preprocess the witness to avoid any unformatted XML
@@ -69,6 +72,7 @@ class JavaWitnessProcessor(WitnessProcessor):
             assumption_value = 'NaN'
         return str(assumption_value)
 
+    @validation_error_handler(AssumptionExtractionError)
     def extract_assumptions(self) -> List[Assumption]:
         """
         Extracts the assumptions from the witness
@@ -108,16 +112,17 @@ class JavaFileProcessor(FileProcessor):
         self.package_paths = package_paths if package_paths is not None else []
         self.source_files = list(glob.glob(self.benchmark_path + "/**/*.java", recursive=True))
 
+    @validation_error_handler(FilePreprocessingError)
     def preprocess(self) -> None:
         copy_tree(self.benchmark_path, self.test_directory)
         for package in self.package_paths:
             copy_tree(package, self.test_directory)
 
     def _check_valid_import(self, import_line: str) -> List[str]:
-        check_file = import_line.strip()\
-            .replace(".", "/")\
-            .replace(";", "")\
-            .replace("import", "")\
+        check_file = import_line.strip() \
+            .replace(".", "/") \
+            .replace(";", "") \
+            .replace("import", "") \
             .replace(' ', '')
         if not check_file.startswith('java') and check_file != 'org/sosy_lab/sv_benchmarks/Verifier':
             # Check in working directory
@@ -150,6 +155,7 @@ class JavaFileProcessor(FileProcessor):
                 return [full_paths[files_exists.index(True)]]
         return []
 
+    @validation_error_handler(PositionTypeExtractionError)
     def extract_position_type_map(self) -> dict[Position, str]:
         position_type_map: dict[Position, str] = {}
         nondet_functions_map: dict[str, Position] = {}
