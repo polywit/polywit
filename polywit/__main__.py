@@ -10,6 +10,10 @@ import sys
 
 import argparse
 
+from polywit.java.test_harness import JavaTestHarness
+
+from polywit.java.file_processors import JavaFileProcessor, JavaWitnessProcessor
+
 from polywit import __version__
 from polywit.java import JavaValidator
 from polywit.kotlin import KotlinValidator
@@ -56,6 +60,12 @@ def create_argument_parser() -> argparse.ArgumentParser:
         help="Shows the extracted assumptions from the witness"
     )
 
+    base_subparser.add_argument(
+        '--directory',
+        action='store_true',
+        help='Directory that the test harness will be written to'
+    )
+
     java_sub_parser = subparsers.add_parser(
         'java',
         help='Use the java validator',
@@ -70,6 +80,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
     java_sub_parser.add_argument(
         '--packages',
+        default=[],
         dest='package_paths',
         type=dir_path,
         nargs='*',
@@ -99,6 +110,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
     kotlin_sub_parser.add_argument(
         '--packages',
+        default=[],
         dest='package_paths',
         type=dir_path,
         nargs='*',
@@ -125,6 +137,16 @@ def main():
         print(f'polywit: v{__version__}')
         match config['language']:
             case 'java':
+                file_processor = JavaFileProcessor(
+                    config['directory'],
+                    config['benchmark'],
+                    config['package_paths']
+                )
+                witness_processor = JavaWitnessProcessor(
+                    config['directory'],
+                    config['witness_file']
+                )
+                test_harness = JavaTestHarness(config['directory'])
                 validator = JavaValidator(config)
             case 'kotlin':
                 validator = KotlinValidator(config)
