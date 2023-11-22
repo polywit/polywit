@@ -1,0 +1,16 @@
+rich~=13.6.0
+rich-click~=1.7.1
+assertpy~=1.1.0
+pytest==7.4.3
+pytest-cov==4.1.0
+setuptools==68.2.2
+flake8~=6.1.0
+mutmut~=2.4.4
+networkx~=2.8.8
+javalang~=0.13.0
+kopyt~=0.0.2
+setuptools==65.6.3
+tabulate~=0.9.0
+halo~=0.0.31
+polywit~=1.0.0
+pytest~=7.2.2

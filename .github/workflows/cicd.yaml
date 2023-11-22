@@ -1,0 +1,60 @@
+name: 🕵️ PR Inspector Workflow
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cicd:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🔄 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: 📦 Install dependencies
+      run: pip install -r requirements-dev.txt  # Replace with your requirements file
+
+    - name: ❄️ Run Flake8
+      run: flake8 .
+
+    - name: 🧪 Run unit tests
+      run: pytest --cov
+    
+    - name: ☂️ Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: 🗃️ Uncache Mutation Testing Artifacts
+      uses: actions/cache/restore@v3
+      with:
+        path: .mutmut-cache
+        key: mutmut-cache-${{ github.ref_name }}-${{ hashFiles('polywit/*.py') }}
+        restore-keys: |
+          mutmut-cache-${{ github.ref_name }}
+          mutmut-cache-main
+
+    - name: 🦠 Run Mutation Tests
+      run: | 
+        mutmut run --no-progress --CI
+        mutmut html
+
+    - name: 📤 Upload Mutation Test Report
+      uses: actions/upload-artifact@v2
+      with:
+        name: mutmut-html-report
+        path: html/polywit
+
+    - name: 🗃️ Cache Mutation Test Artifacts
+      uses: actions/cache/save@v3
+      with:
+        path: .mutmut-cache
+        key: mutmut-cache-${{ github.ref_name }}-${{ hashFiles('polywit/*.py') }}
