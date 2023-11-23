@@ -1,0 +1,52 @@
+Under the hood grab Graph Data for Witness Automata 
+
+Workflow:
+  Description: This is your state machine
+  StartAt: Witness Choice 
+  Language: Java
+  States:
+    Witness Choice:
+      Type: Choice
+      Choices: 
+        - Variable: WitnessType
+          Value: Violation
+          Next: Violation Execution Engine
+    
+    Violation Execution Engine:
+      Type: Engine
+      Method: ExecutionValidtion
+      Parameters:
+        - ShowAssumptions: True
+      ResultVariable: ViolationExecutionEngineResult
+      Next: Violation Execution Engine
+
+    Violation Execution Engine:
+      Type: Choice
+      Choices: 
+        - Variable: ViolationExecutionEngineResult
+          Value: VALID
+          Next: Violation Validation Valid
+        - Variable: ViolationExecutionEngineResult
+          Value: INVALID
+          Next: Violation Validation Invalid
+
+    Violation Validation Valid:
+      Type: Result
+      Return: VALID
+
+    Violation Validation Invalid:
+      Type: Result
+      Return: INVALID
+
+    Violation Validation Unknown:
+      Type: Result
+      Return: UNKNOWN
+
+    Violation Validation Error:
+      Type: Result
+      Return: ERROR
+      
+      
+        
+        
+        
