@@ -1,0 +1,47 @@
+Description: SVCOMP Java Assertion Track Workflow
+StartAt: Witness Choice 
+Language: Java
+Steps:
+  Witness Choice:
+    Type: Choice
+    Choices: 
+      - Variable: WitnessType
+        Value: VIOLATION
+        Next: Violation Execution Engine
+      - Variable: WitnessType
+        Value: CORRECTNESS
+        Next: Violation Validation Unknown
+  
+  Violation Execution Engine:
+    Type: Engine
+    Method: ExecutionValidation
+    Parameters:
+      - ShowAssumptions: True
+    ResultVariable: ViolationExecutionEngineResult
+    Next: Violation Execution Result Choice
+
+  Violation Execution Result Choice:
+    Type: Choice
+    Choices: 
+      - Variable: ViolationExecutionEngineResult
+        Value: VALID
+        Next: Violation Validation Valid
+      - Variable: ViolationExecutionEngineResult
+        Value: INVALID
+        Next: Violation Validation Invalid
+
+  Violation Validation Valid:
+    Type: Result
+    Result: VALID
+
+  Violation Validation Invalid:
+    Type: Result
+    Result: INVALID
+
+  Violation Validation Unknown:
+    Type: Result
+    Result: UNKNOWN
+
+  Violation Validation Error:
+    Type: Result
+    Result: ERROR
